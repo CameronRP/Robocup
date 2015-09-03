@@ -1,4 +1,4 @@
-/*
+
 void testingCode(){
   Serial.println("First loop");
   int tick = 0;
@@ -13,4 +13,4 @@ void testingCode(){
   }
   
 }
-*/
+
