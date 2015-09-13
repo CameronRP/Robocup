@@ -42,17 +42,19 @@ boolean isFloor(void) { return floorSwitch; }
 
 //IR Sensors
 int ir1 = 0;
-int getIR1(void) { return ir1; }
+int getIR1Raw(void) { return ir1; }
+int getIR1(void) { return calculateIrInMM(ir1, ir1ReadingSize, ir1RawVals, ir1DisVals); }
 int ir2 = 0;
-int getIR2(void) { return ir2; }
+int getIR2Raw(void) { return ir2; }
+int getIR2(void) { return ir1; }
 int ir3 = 0;
-int getIR3(void) { return ir3; }
+int getIR3Raw(void) { return ir3; }
 int ir4 = 0;
-int getIR4(void) { return ir4; }
+int getIR4Raw(void) { return ir4; }
 int ir5 = 0;
-int getIR5(void) { return ir5; }
+int getIR5Raw(void) { return ir5; }
 int irTop = 0;
-int getIRTop(void) { return irTop;}
+int getIRTopRaw(void) { return irTop;}
 
 //US Sensors
 int usLeft = 0;
@@ -64,6 +66,11 @@ int getUSRight(void) { return usRight; }
 //=====================CALCULATION VARIABLES=====================
 long usLeftDuration = 0;
 long usRightDuration = 0;
+
+int ir1ReadingSize = 5;
+int[ir1ReadingSize] ir1RawVals = {170, 120, 90, 70, 60};  //Raw ir values at each distance.
+int[ir1ReadingSize] ir1DisVals = {30, 50, 70, 90, 110};  //Distance in mm
+
 
 //========================SETUP SENSORS INPUTS===================================
 void setupSensors(void) {
@@ -147,6 +154,26 @@ long getUSDuration(int echoPin, int trigPin) {
   return pulseIn(echoPin, HIGH, US_TIMEOUT);
 }
 
+//Used the recorded distances to estimate the distance from the raw IR reading.
+//For each IR sensor there is a RawArray, DisArray and readingsSize.
+//When the IR sensor is calibrated each reading has a raw (analog value from ir sensor) value and distance value (distance from front of robot in mm).
+//These points are stored in RawArray and DisArray with the same index.
+//To calculate the distance the inputed IR value is used and the two IR readings that it is between are used to make a y = mx + c function.
+//The inputed IR value is then used in this function to aproximate the distance.
+//If the ir value is not found to be between and two data points the function returns -1;
+int calculateIrInMM(int rawVal, int readingsSize, int* rawArray, int* disArray){
+  //m = (x(i+1) - x(i))/(y(i+1) - y(i))
+  //c = y - mx
+  //y = mx + c
+  for (int i = 0; i < readingsSize-1; i++){
+    if(rawArray[i] <= rawVal && rawVal <= rawArray[i+1]){
+      double m = (disArray[i+1] - disArray[i])/(rawArray[i+1] - rawArray[i]);
+      int c = rawArray[i] - m*disArray[i];
+      return (m*rawVal + c);
+    }
+  }
+  return -1;
+}
 
 // Returns the US reading
 // Error -1 is 3 values, 1st greater than 700,

@@ -43,6 +43,25 @@ void testingOutputIrSensors(){
   }
 }
 
+void testingOutputIrSensorsRaw(){
+  String output = "";
+  int tick = 0;
+  while (true){
+    delay(2);
+    updateSensors();
+    tick++;
+    output = "==========";
+    output += "\nTick: " + String(tick);
+    output += "\nIR1: " + String(getIR1Raw());
+    output += "\nIR2: " + String(getIR2Raw());
+    output += "\nIR3: " + String(getIR3Raw());
+    output += "\nIR4: " + String(getIR4Raw());
+    output += "\nIR5: " + String(getIR5Raw());
+    output += "\n==========";
+    Serial.println(output);
+  }
+}
+
 void testingSwitches(){
   String output = "";
   int tick = 0;
