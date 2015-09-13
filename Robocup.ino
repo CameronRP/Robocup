@@ -1,29 +1,26 @@
 //This is the arduino code for the Robocup 2015 competition by Lui and Cameron (team 13).
-//Set testing to false to run main code, otherwise set it to true and set testCode to one of the options in the enum.T
 
-//=================TESTING CODE ON===================================
-//To start the testing code set serialOut to true and set state to TESTING
+//=================TESTING AND SERIAL CODE ON===================================
+//To test code, set testing to true. This will run the testingCode() function in testing.ino. Go to testing.ino for more info.
+//You will probably also want serial set to true.
 //===================================================================
-
-enum State {SEARCHING, DETECTED, JUST_LOST_SIGHT_OF_FOOD, PICK_UP_FOOD, TESTING};
-State state = TESTING;
-
 boolean testing = true;
-int testingType = 0;
-boolean serialOut = true;
+boolean serial = true;
+
+//
+enum State {SEARCHING, DETECTED, JUST_LOST_SIGHT_OF_FOOD, PICK_UP_FOOD};
+State state = SEARCHING;  //state to start in.
 
 
 void setup(){
-  Serial.println(getUSLeft());
   setupSensors();
-  if (serialOut){
-    Serial.begin(9600);
-  }
+  if (serial) { Serial.begin(9600); }
+  if (testing) { testingCode(); }
 }
 
 void loop(){
-  //updateSensors();
-  //updateMotors();
+  updateSensors();
+  updateMotors();
   switch (state){
     case SEARCHING:
       //searching();
@@ -31,31 +28,33 @@ void loop(){
     case DETECTED:
       detected();
       break;
-    
+
     case JUST_LOST_SIGHT_OF_FOOD:
       justLostSightOfFood();
       break;
-    
+
     case PICK_UP_FOOD:
       pickUpFood();
       break;
-    case TESTING:
-      testingCode();
-      break;
-    
     default:  //This state should not be entered.
-      while(true){
-        if (serialOut){
-          Serial.print("In default state. state = : ");
-          Serial.println(state);
-        }
-      }
+      errorFunction("Went into default state.");
       break;
-  }  
+  }
 
-  if (serialOut){
+  if (serial){
     Serial.println("some info to print");
     Serial.println("Some other info to print");
+  }
+}
+
+void errorFunction(String message){
+  Serial.begin(9600);
+  while (true) {
+    Serial.println(message);
+    setLedWarning(true);
+    delay(300);
+    setLedWarning(false);
+    delay(300);
   }
 }
 
@@ -79,7 +78,7 @@ void wallFollowing(void){
   } else {
     off(LED2);
   }
-  
+
   // put your main code here, to run repeatedly:
   if (conductionSwitch == 1) {
     on(LED1);
@@ -89,21 +88,21 @@ void wallFollowing(void){
       delightfullyMoist();
     }
   }
-  
+
   if (leftSwitch) {
     setBothMotor(0);
     setRightMotor(40);
     delay(500);
     huntTheFood();
-  }  
-  
+  }
+
   if (rightSwitch) {
     setBothMotor(0);
     setLeftMotor(40);
     delay(500);
     huntTheFood();
   }
-  
+
   rightUSmm = rightUSVal();
   leftUSmm = leftUSVal();
 
@@ -111,24 +110,24 @@ void wallFollowing(void){
   Serial.println(rightUSmm);
   Serial.print("left val: ");
   Serial.println(leftUSmm);
-  
-  
+
+
   if ((rightUSmm <= 450) && (leftUSmm <= 450)) {
     updateAllSwitch();
-    
+
     for(i = 0; (i < 200) &&((leftSwitch == 0) && (rightSwitch == 0)); i++) {
       delay(10);
       updateAllSwitch();
     }
-    
+
     if (i <= 495) {
       if (leftSwitch) {
         setBothMotor(0);
         setRightMotor(40);
         delay(700);
         huntTheFood();
-      } else{ 
-    
+      } else{
+
       if (rightSwitch) {
           setBothMotor(0);
           setLeftMotor(40);
@@ -137,9 +136,9 @@ void wallFollowing(void){
         }
       }
     } else {
-      
-      
-    
+
+
+
     if (rightUSmm < leftUSmm) {
       turnRightSome();
     } else {
@@ -150,8 +149,8 @@ void wallFollowing(void){
     setRightMotor((rightUSmm / 10 - 20));
   } else {
     setRightMotor(50);
-  } 
-  
+  }
+
   if (leftUSmm < 650) {
     setLeftMotor((leftUSmm / 10 - 20));
   } else {
@@ -192,14 +191,3 @@ void justLostSightOfFood(void){
 void pickUpFood(void){
   //TODO
 }
-
-
-
-
-
-
-
-
-
-
-

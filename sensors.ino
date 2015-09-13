@@ -29,23 +29,36 @@ const int usRightEchoPin = 42;
 //====================Output Variables...... AND FUNCTIONS=====================
 //The variables that other modues will use
 //Switches
-boolean limitSwitch = false;        boolean isLimit(void) { return limitSwitch; }
-boolean conductionSwitch = false;   boolean isConduction(void) { return conductionSwitch; }
-boolean leftFrontSwitch = false;    boolean isLeftFront(void) { return leftFrontSwitch; }
-boolean rightFrontSwitch = false;   boolean isRightFront(void) { return rightFrontSwitch; }
-boolean floorSwitch = false;        boolean isFloor(void) { return floorSwitch; }
+boolean limitSwitch = false;
+boolean isLimit(void) { return limitSwitch; }
+boolean conductionSwitch = false;
+boolean isConduction(void) { return conductionSwitch; }
+boolean leftFrontSwitch = false;
+boolean isLeftFront(void) { return leftFrontSwitch; }
+boolean rightFrontSwitch = false;
+boolean isRightFront(void) { return rightFrontSwitch; }
+boolean floorSwitch = false;
+boolean isFloor(void) { return floorSwitch; }
 
 //IR Sensors
-int ir1 = 0;       int getIR1(void) { return ir1; }
-int ir2 = 0;       int getIR2(void) { return ir2; }
-int ir3 = 0;       int getIR3(void) { return ir3; }
-int ir4 = 0;       int getIR4(void) { return ir4; }
-int ir5 = 0;       int getIR5(void) { return ir5; }
-int irTop = 0;     int getIRTop(void) { return irTop;}
+int ir1 = 0;
+int getIR1(void) { return ir1; }
+int ir2 = 0;
+int getIR2(void) { return ir2; }
+int ir3 = 0;
+int getIR3(void) { return ir3; }
+int ir4 = 0;
+int getIR4(void) { return ir4; }
+int ir5 = 0;
+int getIR5(void) { return ir5; }
+int irTop = 0;
+int getIRTop(void) { return irTop;}
 
 //US Sensors
-int usLeft = 0;    int getUSLeft(void) { return usLeft; }
-int usRight = 0;   int getUSRight(void) { return usRight; }
+int usLeft = 0;
+int getUSLeft(void) { return usLeft; }
+int usRight = 0;
+int getUSRight(void) { return usRight; }
 
 
 //=====================CALCULATION VARIABLES=====================
@@ -61,7 +74,7 @@ void setupSensors(void) {
   pinMode(leftFrontSwitchPin, INPUT);
   pinMode(rightFrontSwitchPin, INPUT);
   pinMode(floorSwitchPin, INPUT);
-  
+
   //IR sensors
   pinMode(ir1Pin, INPUT);
   pinMode(ir2Pin, INPUT);
@@ -69,7 +82,7 @@ void setupSensors(void) {
   pinMode(ir4Pin, INPUT);
   pinMode(ir5Pin, INPUT);
   pinMode(irTopPin, INPUT);
-  
+
   //US sensors
   pinMode(usLeftTrigPin, OUTPUT);
   pinMode(usLeftEchoPin, INPUT);
@@ -89,7 +102,7 @@ void updateSensors(void) {
   leftFrontSwitch = digitalRead(leftFrontSwitchPin);
   rightFrontSwitch = digitalRead(rightFrontSwitchPin);
   floorSwitch = digitalRead(floorSwitchPin);
-  
+
   //Updating IR Sensors
   ir1 = digitalRead(ir1Pin);
   ir2 = digitalRead(ir2Pin);
@@ -105,7 +118,7 @@ void updateUS(void) {
   usLeftDuration = getUSDuration(usLeftEchoPin, usLeftTrigPin);
   delay(20);
   usRightDuration = getUSDuration(usRightEchoPin, usRightTrigPin);
- 
+
   usLeft = msToMM(usLeftDuration);
   usRight = msToMM(usRightDuration);
 }
@@ -130,7 +143,7 @@ long getUSDuration(int echoPin, int trigPin) {
   // The same pin is used to read the signal from the PING))): a HIGH
   // pulse whose duration is the time (in microseconds) from the sending
   // of the ping to the reception of its echo off of an object.
-//  ulong 
+//  ulong
   return pulseIn(echoPin, HIGH, US_TIMEOUT);
 }
 
@@ -161,5 +174,3 @@ long getUSDistance(int echoPin, int trigPin) {
   return b;
 }
 */
-
-
