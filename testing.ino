@@ -3,8 +3,9 @@
 
 void testingCode(){
   Serial.println("Testing starting.");
+  Serial.println(atan(1));
   setupSensors();
-  testTopUsSensor();
+  testingAngleToWall();
 }
 
 void testingOutputUsSensorsInMM(){
@@ -54,6 +55,7 @@ void testingOutputIrSensors(void){
     output += "\nIR3: " + String(getIR3());
     output += "\nIR4: " + String(getIR4());
     output += "\nIR5: " + String(getIR5());
+    output += "\nTop: " + String(getIRTop());
     output += "\n==========";
     Serial.println(output);
   }
@@ -73,6 +75,7 @@ void testingOutputIrSensorsRaw(void){
     output += "\nIR3: " + String(getIR3Raw());
     output += "\nIR4: " + String(getIR4Raw());
     output += "\nIR5: " + String(getIR5Raw());
+    output += "\nTop: " + String(getIRTopRaw());
     output += "\n==========";
     Serial.println(output);
   }
@@ -105,7 +108,7 @@ void testWarningLED(){
 void testingWallFacing(void){
   String output = "";
   int tick = 0;
-  int error = 10;
+  int error = 30;
   int p2p = 0;
   int p3p = 0;
   int p4p = 0;
@@ -132,20 +135,71 @@ void testingWallFacing(void){
   }
 }
 
+void testingDistanceFromWall(void){
+  String output = "";
+  int tick = 0;
+  int total = 0;
+  while(true){
+    delay(200);
+    updateSensors();
+    tick++;
+    total = getIR1()+getIR2()+getIR3()+getIR4()+getIR5();
+    output = "===";
+    output += "\nDis: " + String(total/5);
+    Serial.println(output);
+  }
+}
+
 void testingAngleToWall(void){
   String output = "";
   int tick = 0;
   int diff = 0;
   while(true){
-    delay(2);
+    delay(200);
     updateSensors();
     tick++;
-    output = "==========";
-    output = "\nIR1: " + String(getIR1());
-    output = "\nIR5: " + String(getIR5());
+    if (getIR2() < 300 && getIR4() < 300){
+      //Wall is close so use short range ir sensors
+      diff = getIR4()-getIR2();
+      output = "===";
+      //output += "\nD: " + String(diff);
+      output += "\nS: " + String(atan2(diff, 110));
+    } else {
+      diff = getIR5()-getIR1();
+      output = "===";
+      //output += "\nD: " + String(diff);
+      output += "\nL: " + String(atan2(diff, 230));
+    }
+    Serial.println(output);
+  }
+}
+
+void testingAngleToWallUsingLongIr(void) {
+  String output = "";
+  int tick = 0;
+  int diff = 0;
+  while(true){
+    delay(200);
+    updateSensors();
     diff = getIR5()-getIR1();
-    output = "\nDiff: " + String(diff);
-    output = "\nAngle: " + String(atan2(diff, 160));
+    output = "===";
+    output += "\nD: " + String(diff);
+    output += "\nA: " + String(atan2(diff, 230));
+    Serial.println(output);
+  }
+}
+
+void testingAngleToWallUsingShortIr(void) {
+  String output = "";
+  int tick = 0;
+  int diff = 0;
+  while(true){
+    delay(200);
+    updateSensors();
+    diff = getIR4()-getIR2();
+    output = "===";
+    output += "\nD: " + String(diff);
+    output += "\nA: " + String(atan2(diff, 110));
     Serial.println(output);
   }
 }

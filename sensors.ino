@@ -13,12 +13,12 @@ const int rightFrontSwitchPin = A4;
 const int floorSwitchPin = A6;
 
 //IR sensors Pins
-const int ir1Pin = A2;
-const int ir2Pin = A3;
-const int ir3Pin = A1;
-const int ir4Pin = A10;
-const int ir5Pin = A11;
-const int irTopPin = A0;
+const int ir1Pin = A2;  //1
+const int ir2Pin = A3;  //2
+const int ir3Pin = A6;
+const int ir4Pin = A11;  //5
+const int ir5Pin = A10;  //4
+const int irTopPin = A7;
 
 //US snesors Pins
 const int usLeftTrigPin = 31;
@@ -42,45 +42,80 @@ boolean floorSwitch = false;
 boolean isFloor(void) { return floorSwitch; }
 
 //IR Sensors
-int ir1ReadingSize = 8;
-int ir1RawVals[8] = {494, 348, 261, 206, 170, 120, 95, 40};  //Raw ir values at each distance.
-int ir1DisVals[8] = {100, 150, 200, 250, 300, 400, 500, 800};  //Distance in mm
+int ir1ReadingSize = 9;
+int ir1RawVals[9] = {565, 515, 450, 391, 340, 293, 233, 185, 130};  //Raw ir values at each distance.
+int ir1DisVals[9] = {150, 200, 250, 300, 350 ,400, 500, 600, 800};  //Distance in mm
 
 int ir2ReadingSize = 8;
-int ir2RawVals[8] = {491, 352, 273, 226, 189, 130, 105, 40};  //Raw ir values at each distance.
+int ir2RawVals[8] = {455, 325, 255, 209, 175, 130, 97, 50};  //Raw ir values at each distance.
 int ir2DisVals[8] = {100, 150, 200, 250, 300, 400, 500, 800};  //Distance in mm
 
 int ir3ReadingSize = 8;
-int ir3RawVals[8] = {502, 351, 265, 220, 184, 131, 109, 45};  //Raw ir values at each distance.
+int ir3RawVals[8] = {455, 323, 253, 206, 173, 125, 89, 30};  //Raw ir values at each distance.
 int ir3DisVals[8] = {100, 150, 200, 250, 300, 400, 500, 800};  //Distance in mm
 
 int ir4ReadingSize = 8;
-int ir4RawVals[8] = {518, 363, 281, 235, 203, 190, 130, 50};  //Raw ir values at each distance.
+int ir4RawVals[8] = {449, 316, 247, 202, 172, 128, 92, 65};  //Raw ir values at each distance.
 int ir4DisVals[8] = {100, 150, 200, 250, 300, 400, 500, 800};  //Distance in mm
 
-int ir5ReadingSize = 8;
-int ir5RawVals[8] = {499, 356, 268, 214, 175, 128, 105, 70};  //Raw ir values at each distance.
-int ir5DisVals[8] = {100, 150, 200, 250, 300, 400, 500, 800};  //Distance in mm
+int ir5ReadingSize = 9;
+int ir5RawVals[9] = {540, 500, 450, 395, 343, 300, 240, 200, 125};  //Raw ir values at each distance.
+int ir5DisVals[9] = {150, 200, 250, 300, 350, 400, 500, 600, 800};  //Distance in mm
+
+int irTopReadingSize = 8;
+int irTopRawVals[8] = {518, 363, 281, 235, 203, 190, 130, 50};  //Raw ir values at each distance.
+int irTopDisVals[8] = {100, 150, 200, 250, 300, 400, 500, 800};  //Distance in mm
+
 
 
 int ir1 = 0;
+int ir1_2 = 0;
+int ir1_3 = 0;
 int getIR1Raw(void) { return ir1; }
-int getIR1(void) { return calculateIrInMM(ir1, ir1ReadingSize, ir1RawVals, ir1DisVals); }
+int getIR1(void) { 
+  int avg = (ir1+ir1_2+ir1_3)/3;
+  return calculateIrInMM(avg, ir1ReadingSize, ir1RawVals, ir1DisVals); \
+}
+
 int ir2 = 0;
+int ir2_2 = 0;
+int ir2_3 = 0;
 int getIR2Raw(void) { return ir2; }
-int getIR2(void) { return calculateIrInMM(ir2, ir2ReadingSize, ir2RawVals, ir2DisVals); }
+int getIR2(void) { 
+  int avg = (ir2+ir2_2+ir2_3)/3;
+  return calculateIrInMM(avg, ir2ReadingSize, ir2RawVals, ir2DisVals); 
+}
+
 int ir3 = 0;
+int ir3_2 = 0;
+int ir3_3 = 0;
 int getIR3Raw(void) { return ir3; }
-int getIR3(void) { return calculateIrInMM(ir3, ir3ReadingSize, ir3RawVals, ir3DisVals); }
+int getIR3(void) { 
+  int avg = (ir3+ir3_2+ir3_3)/3;
+  return calculateIrInMM(avg, ir3ReadingSize, ir3RawVals, ir3DisVals); 
+}
+
 int ir4 = 0;
+int ir4_2 = 0;
+int ir4_3 = 0;
 int getIR4Raw(void) { return ir4; }
-int getIR4(void) { return calculateIrInMM(ir4, ir4ReadingSize, ir4RawVals, ir4DisVals); }
+int getIR4(void) { 
+  int avg = (ir4+ir4_2+ir4_3)/3;
+  return calculateIrInMM(avg, ir4ReadingSize, ir4RawVals, ir4DisVals); 
+}
+
 int ir5 = 0;
+int ir5_2 = 0;
+int ir5_3 = 0;
 int getIR5Raw(void) { return ir5; }
-int getIR5(void) { return calculateIrInMM(ir5, ir5ReadingSize, ir5RawVals, ir5DisVals); }
+int getIR5(void) { 
+  int avg = (ir5+ir5_2+ir5_3)/3;
+  return calculateIrInMM(avg, ir5ReadingSize, ir5RawVals, ir5DisVals); 
+}
 
 int irTop = 0;
-int getIRTop(void) { return irTop; }
+int getIRTopRaw(void) { return irTop; }
+int getIRTop(void) { return calculateIrInMM(irTop, irTopReadingSize, irTopRawVals, irTopDisVals); }
 
 //US Sensors
 int usLeft = 0;
@@ -135,11 +170,27 @@ void updateSensors(void) {
   floorSwitch = digitalRead(floorSwitchPin);
 
   //Updating IR Sensors
+  ir1_3 = ir1_2;
+  ir1_2 = ir1;
   ir1 = analogRead(ir1Pin);
+  
+  ir2_3 = ir2_2;
+  ir2_2 = ir2;
   ir2 = analogRead(ir2Pin);
+  
+  ir3_3 = ir3_2;
+  ir3_2 = ir3;
   ir3 = analogRead(ir3Pin);
+  
+  ir4_3 = ir4_2;
+  ir4_2 = ir4;
   ir4 = analogRead(ir4Pin);
+  
+  ir5_3 = ir5_2;
+  ir5_2 = ir5;
   ir5 = analogRead(ir5Pin);
+  
+  
   irTop = analogRead(irTopPin);
   //irTop = digitalRead(irTopPin);
   
