@@ -1,5 +1,7 @@
 //This is the arduino code for the Robocup 2015 competition by Lui and Cameron (team 13).
 
+#include <math.h>
+
 //=================TESTING AND SERIAL CODE ON===================================
 //To test code, set testing to true. This will run the testingCode() function in testing.ino. Go to testing.ino for more info.
 //You will probably also want serial set to true.

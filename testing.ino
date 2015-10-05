@@ -3,7 +3,8 @@
 
 void testingCode(){
   Serial.println("Testing starting.");
-  testingOutputUsSensorsInMM();
+  setupSensors();
+  testTopUsSensor();
 }
 
 void testingOutputUsSensorsInMM(){
@@ -16,19 +17,34 @@ void testingOutputUsSensorsInMM(){
     output = "==========";
     output += "\nTick: " + String(tick);
     output += "Update time: " + String(millis() - echoTime);
-    output += "\nRight sensor: " + String(getUSRight());
-    output += "\nLeft  sensor: " + String(getUSLeft());
+    output += "\nRight sensor: " + String(getUsRight());
+    output += "\nLeft  sensor: " + String(getUsLeft());
     output += "==========";
     Serial.println(output);
     echoTime = millis();
   }
 }
 
-void testingOutputIrSensors(){
+void testOneIr(void){
   String output = "";
   int tick = 0;
   while (true){
-    delay(2);
+    delay(500);
+    updateSensors();
+    tick++;
+    output = "==========";
+    output += "\nTick: " + String(tick);
+    output += "\nIR1: " + String(getIR1());
+    output += "\n==========";
+    Serial.println(output);
+  }
+}
+
+void testingOutputIrSensors(void){
+  String output = "";
+  int tick = 0;
+  while (true){
+    delay(500);
     updateSensors();
     tick++;
     output = "==========";
@@ -43,11 +59,11 @@ void testingOutputIrSensors(){
   }
 }
 
-void testingOutputIrSensorsRaw(){
+void testingOutputIrSensorsRaw(void){
   String output = "";
   int tick = 0;
   while (true){
-    delay(2);
+    delay(500);
     updateSensors();
     tick++;
     output = "==========";
@@ -62,7 +78,7 @@ void testingOutputIrSensorsRaw(){
   }
 }
 
-void testingSwitches(){
+void testingSwitches(void){
   String output = "";
   int tick = 0;
   while (true){
@@ -86,9 +102,68 @@ void testWarningLED(){
   errorFunction("Testing error function.");
 }
 
+void testingWallFacing(void){
+  String output = "";
+  int tick = 0;
+  int error = 10;
+  int p2p = 0;
+  int p3p = 0;
+  int p4p = 0;
+  while (true){
+    delay(2);
+    updateSensors();
+    tick++;
+    p2p = getIR1() + (getIR5()-getIR1())/4;
+    p3p = getIR1() + (getIR5()-getIR1())/2;
+    p4p = getIR1() + (getIR5()-getIR1())*3/4;
+    
+    output = "==========";
+    output += "\nTick: " + String(tick);
+    output += "\nPoint2 error: " + String(p2p-getIR2());
+    output += "\nPoint3 error: " + String(p2p-getIR3());
+    output += "\nPoint4 error: " + String(p2p-getIR4());
+    
+    output += "\nPoint2 boolean: " + String(!((p2p-error) < getIR2() && getIR2() < (p2p+error)));
+    output += "\nPoint3 boolean: " + String(!((p3p-error) < getIR3() && getIR3() < (p3p+error)));
+    output += "\nPoint4 boolean: " + String(!((p4p-error) < getIR4() && getIR4() < (p4p+error)));
+    
+    output += "\n==========";
+    Serial.println(output);
+  }
+}
 
+void testingAngleToWall(void){
+  String output = "";
+  int tick = 0;
+  int diff = 0;
+  while(true){
+    delay(2);
+    updateSensors();
+    tick++;
+    output = "==========";
+    output = "\nIR1: " + String(getIR1());
+    output = "\nIR5: " + String(getIR5());
+    diff = getIR5()-getIR1();
+    output = "\nDiff: " + String(diff);
+    output = "\nAngle: " + String(atan2(diff, 160));
+    Serial.println(output);
+  }
+}
 
-
+void testTopUsSensor(void) {
+  String output = "";
+  int tick = 0;
+  while(true){
+    delay(200);
+    updateSensors();
+    tick++;
+    output = "==========";
+    output += "\nTop us raw value: " + String(getIRTop());
+    output += "\nMid ir: " + String(getIR3Raw());
+    Serial.println(output);
+    
+  }
+}
 
 //Function default layout
 /*
