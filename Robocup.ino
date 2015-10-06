@@ -1,6 +1,7 @@
 //This is the arduino code for the Robocup 2015 competition by Lui and Cameron (team 13).
 
 #include <math.h>
+#include <Servo.h>
 
 //=================TESTING AND SERIAL CODE ON===================================
 //To test code, set testing to true. This will run the testingCode() function in testing.ino. Go to testing.ino for more info.
@@ -8,6 +9,8 @@
 //===================================================================
 boolean testing = true;
 boolean serial = true;
+
+
 
 //
 enum State {SEARCHING, DETECTED, JUST_LOST_SIGHT_OF_FOOD, PICK_UP_FOOD};

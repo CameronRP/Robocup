@@ -1,30 +1,224 @@
 //Code to run for testing.
 
 
+boolean commenting = 0;
+
+
 void testingCode(){
   Serial.println("Testing starting.");
-  Serial.println(atan(1));
   setupSensors();
-  testingAngleToWall();
+  setupSimpleOutputs();
+  setupDCMotor();
+  testingOutputUsSensorsInMM();
+//  testWallFollow();
+  
+  //testWeightDetect();
 }
+
+void testWallFollow(void) {
+  
+  while(1)
+  setBothMotor(50);
+  
+  
+  
+}
+
 
 void testingOutputUsSensorsInMM(){
   String output = "";
   int tick = 0;
   unsigned long echoTime = millis();
   while (true){
+    //delay(500);
     updateUS();
+    setupSimpleOutputs();
+    /*
     tick++;
-    output = "==========";
-    output += "\nTick: " + String(tick);
-    output += "Update time: " + String(millis() - echoTime);
-    output += "\nRight sensor: " + String(getUsRight());
-    output += "\nLeft  sensor: " + String(getUsLeft());
-    output += "==========";
+    output = "===";
+    output += "\nR: " + String(getUsRight());
+    output += "\nL: " + String(getUsLeft());
     Serial.println(output);
     echoTime = millis();
+    */
+    
+    
+    if(getUsLeft() < 320 && getUsRight() < 320 && getUsLeft() > 20 && getUsRight() > 20) {
+      getOutOfHere();
+      updateUS();
+    } else 
+    
+    if (getUsLeft() < 250 && (getUsLeft() > 50)) {
+      digitalWrite(led1, HIGH);
+      turnLeftSharp();
+      digitalWrite(led1, LOW);
+    } else if (getUsLeft() < 500) {
+      setLeftMotor((500 - getUsLeft()) / 5);
+    } else if (getUsLeft() > 500){
+      setLeftMotor(50);
+    } else
+    
+    if (getUsRight() < 250 && getUsRight() > 50) {
+      digitalWrite(led2, HIGH);
+      turnRightSharp();
+      updateUS();
+      digitalWrite(led2, LOW);
+    } else if (getUsRight() < 500) {
+      setRightMotor((500 - getUsRight()) / 5);
+    }  else {
+      setRightMotor(50);
+    }
+    
   }
 }
+
+void testWeightDetect(void){
+  
+  String output = "";
+  int eL = 100;
+  int eR = 120;
+  int eM = 150;
+  int leftCount = 0;
+  int rightCount = 0;
+  int midCount = 0;
+  const int REQUIRED_WEIGHT_DUTY_CYCLE = 10; // 1 - 10
+  
+  while(true){
+    //delay(500);
+    updateSensors();
+    if (commenting) {
+      delay(500);
+      output = "===";
+      output += "\n1: " + String(getIR1Raw());
+      output += "\n2: " + String(getIR2Raw());
+      output += "\n\n4: " + String(getIR4Raw());
+      output += "\n5: " + String(getIR5Raw());
+      output += "\n\n3: " + String(getIR3Raw());
+      output += "\n6: " + String(getIR6Raw());
+    }
+    
+    
+    //int errorL = (abs(getIR1Raw()-getIR2Raw())*100)/max(getIR1Raw(), getIR2Raw());
+    int errorLMM = (abs(getIR1()-getIR2()));
+    //boolean weightL = errorL > eL;
+    boolean weightLMM = (errorLMM > eL) && (getIR2() != -1);
+    //output += "\n%DifL: " + String(errorL);
+    if (commenting) {
+      output += "\n%DifLmm: " + String(errorLMM);
+      output += "\nWeightL: " + String((boolean) weightLMM);
+    }
+    
+    //int errorR = (abs(getIR4Raw()-getIR5Raw())*100)/max(getIR4Raw(), getIR5Raw());
+    int errorRMM = (abs(getIR4()-getIR5()));
+    //boolean weightR = errorR > eR;
+    boolean weightRMM = errorRMM > eR && (getIR4() != -1);
+    //output += "\n%DifR: " + String(errorR);
+    if (commenting) {
+      output += "\n%DifRmm: " + String(errorRMM);
+      output += "\nWeightR: " + String((boolean) weightRMM);
+    }
+    
+    //int errorM = (abs(getIR3Raw()-getIR6Raw())*100)/max(getIR3Raw(), getIR6Raw());
+    int errorMMM = (abs(getIR3()-getIR6()));
+    //boolean weightM = errorM > eM;
+    boolean weightMMM = errorMMM > eM && (getIR6() != -1);
+    //output += "\n%DifM: " + String(errorM);
+    if (commenting) {
+      output += "\n%DifMmm: " + String(errorMMM);
+      output += "\nWeightM: " + String((boolean) weightMMM);
+      Serial.println(output);
+    }
+    
+    if (weightLMM) {
+      leftCount++;
+      
+    } else {
+      leftCount--;
+    }
+  
+  if (weightRMM) {
+      rightCount++;
+    } else {
+      rightCount--;
+    }
+    
+    
+    if (weightMMM) {
+      midCount++;
+    } else {
+      midCount--;
+    }
+    
+    if (leftCount >= REQUIRED_WEIGHT_DUTY_CYCLE * 2) {
+      digitalWrite(26, HIGH);
+      
+    } else {
+      digitalWrite(26, LOW);
+    }
+  
+  if (rightCount >= REQUIRED_WEIGHT_DUTY_CYCLE * 2) {
+      digitalWrite(27, HIGH);
+    } else {
+      digitalWrite(27, LOW);
+    }
+    
+    
+    if (midCount >= REQUIRED_WEIGHT_DUTY_CYCLE * 2) {
+      digitalWrite(28, HIGH);
+    } else {
+      digitalWrite(28, LOW);
+    }
+    
+    if (leftCount > 20) {
+      leftCount = 20;
+    } else  if (leftCount < 0) {
+      leftCount = 0;
+    }
+  
+  if (rightCount > 20) {
+      rightCount = 20;
+    } else if (rightCount < 0) {
+      rightCount = 0;
+    }
+    
+    
+    if (midCount > 20) {
+      midCount = 20;
+    } else if (midCount < 0) {
+      midCount  =0;
+    }
+    
+  }
+}
+
+void testLeftSideWeightDetect(void){
+  String output = "";
+  int error = 80;
+  while(true){
+    delay(500);
+    updateSensors();
+    output = "===";
+    int diff = getIR1Raw() - getIR2Raw();
+    output += "\nD: " + String(diff);
+    output += "\nW: " + String((abs(diff) > error)); 
+    Serial.println(output);
+  }
+}
+
+void testRightSideWeightDetect(void){
+  String output = "";
+  int error = 80;
+  while(true){
+    delay(200);
+    updateSensors();
+    output = "===";
+    int diff = getIR4Raw() - getIR5Raw();
+    output += "\nD: " + String(diff);
+    output += "\nW: " + String((abs(diff) > error)); 
+    Serial.println(output);
+  }
+}
+
 
 void testOneIr(void){
   String output = "";
@@ -34,9 +228,7 @@ void testOneIr(void){
     updateSensors();
     tick++;
     output = "==========";
-    output += "\nTick: " + String(tick);
-    output += "\nIR1: " + String(getIR1());
-    output += "\n==========";
+    output += "\nIR2: " + String(getIR2());
     Serial.println(output);
   }
 }
@@ -55,7 +247,7 @@ void testingOutputIrSensors(void){
     output += "\nIR3: " + String(getIR3());
     output += "\nIR4: " + String(getIR4());
     output += "\nIR5: " + String(getIR5());
-    output += "\nTop: " + String(getIRTop());
+    output += "\n6: " + String(getIR6());
     output += "\n==========";
     Serial.println(output);
   }
@@ -75,7 +267,7 @@ void testingOutputIrSensorsRaw(void){
     output += "\nIR3: " + String(getIR3Raw());
     output += "\nIR4: " + String(getIR4Raw());
     output += "\nIR5: " + String(getIR5Raw());
-    output += "\nTop: " + String(getIRTopRaw());
+    output += "\n6: " + String(getIR6Raw());
     output += "\n==========";
     Serial.println(output);
   }
@@ -85,7 +277,7 @@ void testingSwitches(void){
   String output = "";
   int tick = 0;
   while (true){
-    delay(2);
+    delay(500);
     updateSensors();
     tick++;
     output = "==========";
@@ -108,12 +300,12 @@ void testWarningLED(){
 void testingWallFacing(void){
   String output = "";
   int tick = 0;
-  int error = 30;
+  int error = 60;
   int p2p = 0;
   int p3p = 0;
   int p4p = 0;
   while (true){
-    delay(2);
+    delay(500);
     updateSensors();
     tick++;
     p2p = getIR1() + (getIR5()-getIR1())/4;
@@ -122,17 +314,39 @@ void testingWallFacing(void){
     
     output = "==========";
     output += "\nTick: " + String(tick);
-    output += "\nPoint2 error: " + String(p2p-getIR2());
-    output += "\nPoint3 error: " + String(p2p-getIR3());
-    output += "\nPoint4 error: " + String(p2p-getIR4());
+    output += "\nP2 e: " + String(p2p-getIR2());
+    output += "\nP3 e: " + String(p3p-getIR3());
+    output += "\nP4 e: " + String(p4p-getIR4());
     
-    output += "\nPoint2 boolean: " + String(!((p2p-error) < getIR2() && getIR2() < (p2p+error)));
-    output += "\nPoint3 boolean: " + String(!((p3p-error) < getIR3() && getIR3() < (p3p+error)));
-    output += "\nPoint4 boolean: " + String(!((p4p-error) < getIR4() && getIR4() < (p4p+error)));
+    boolean p2 = ((p2p-error) < getIR2() && getIR2() < (p2p+error));
+    boolean p3 = ((p3p-error) < getIR3() && getIR3() < (p3p+error));
+    boolean p4 = ((p4p-error) < getIR4() && getIR4() < (p4p+error));
     
-    output += "\n==========";
+    output += "\nP2 b: " + String(p2);
+    output += "\nP3 b: " + String(p3);
+    output += "\nP4 b: " + String(p4);
+    output += "\nResult:" + String(p2 && p3 && p4);
+    
     Serial.println(output);
   }
+}
+
+
+boolean testingFlatWallFacingBoolean(void){
+  int error = 25;
+  int p2p = getIR1() + (getIR5()-getIR1())/4;
+  int  p3p = getIR1() + (getIR5()-getIR1())/2;
+  int  p4p = getIR1() + (getIR5()-getIR1())*3/4;
+  if (!((p2p-error) < getIR2() && getIR2() < (p2p+error))){
+    return false;
+  }
+  if (!((p3p-error) < getIR3() && getIR3() < (p3p+error))) {
+    return false;
+  }
+  if (!((p4p-error) < getIR4() && getIR4() < (p4p+error))) {
+    return false;
+  }
+  return true;
 }
 
 void testingDistanceFromWall(void){
@@ -162,12 +376,12 @@ void testingAngleToWall(void){
       //Wall is close so use short range ir sensors
       diff = getIR4()-getIR2();
       output = "===";
-      //output += "\nD: " + String(diff);
+      output += "\nD: " + String(diff);
       output += "\nS: " + String(atan2(diff, 110));
     } else {
       diff = getIR5()-getIR1();
       output = "===";
-      //output += "\nD: " + String(diff);
+      output += "\nD: " + String(diff);
       output += "\nL: " + String(atan2(diff, 230));
     }
     Serial.println(output);
@@ -204,7 +418,7 @@ void testingAngleToWallUsingShortIr(void) {
   }
 }
 
-void testTopUsSensor(void) {
+void test6UsSensor(void) {
   String output = "";
   int tick = 0;
   while(true){
@@ -212,10 +426,65 @@ void testTopUsSensor(void) {
     updateSensors();
     tick++;
     output = "==========";
-    output += "\nTop us raw value: " + String(getIRTop());
+    output += "\n6 us raw value: " + String(getIR6());
     output += "\nMid ir: " + String(getIR3Raw());
     Serial.println(output);
     
+  }
+}
+
+void testingWeightdetectionOnAllIr(){
+  String output = "";
+  int tick = 0;
+  while(true){
+    delay(200);
+    updateSensors();
+    tick++;
+    output = "===";
+    if (testingFlatWallFacingBoolean()){
+      output += "\nfacing flat wall.";
+    } else {
+      
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    output = "===";
+    output += "\n";
+  }
+}
+
+
+void testingWeightdetect(void){
+  String output = "";
+  int tick = 0;
+  int error = 150;
+  int p2p = 0;
+  int p3p = 0;
+  int p4p = 0;
+  while (true){
+    delay(200);
+    updateSensors();
+    tick++;
+    p2p = getIR1() + (getIR5()-getIR1())/4;
+    p3p = getIR1() + (getIR5()-getIR1())/2;
+    p4p = getIR1() + (getIR5()-getIR1())*3/4;
+    
+    int p2e = p2p-getIR2();
+    int p3e = p3p-getIR3();
+    int p4e = p4p-getIR4();
+    
+    output = "===";
+    output += "\n2: " + String(p2e > error);
+    output += "\n3: " + String(p3e > error);
+    output += "\n4: " + String(p4e > error);
+    
+    Serial.println(output);
   }
 }
 

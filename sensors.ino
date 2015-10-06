@@ -1,7 +1,7 @@
 //This does the sensors stuff
 
 //=====================#Defines=====================
-#define US_TIMEOUT 100000
+#define US_TIMEOUT 12000  //This works to about 900mm x 3, becuase lui timesed it by 3.
 
 
 //====================Pins====================
@@ -13,19 +13,18 @@ const int rightFrontSwitchPin = A4;
 const int floorSwitchPin = A6;
 
 //IR sensors Pins
-const int ir1Pin = A2;  //1
-const int ir2Pin = A3;  //2
-const int ir3Pin = A6;
-const int ir4Pin = A11;  //5
-const int ir5Pin = A10;  //4
-const int irTopPin = A7;
+const int ir1Pin = A2;  //Left Upper
+const int ir2Pin = A3;  //Left Lower
+const int ir3Pin = A6;  //Middle Upper
+const int ir4Pin = A11;  //Right Lower
+const int ir5Pin = A10;  //Right Upper
+const int ir6Pin = A7;  //Middle lower
 
 //US snesors Pins
-const int usLeftTrigPin = 31;
-const int usLeftEchoPin = 43;
-const int usRightTrigPin = 30;
-const int usRightEchoPin = 42;
-//const int usTopPin = A1;
+const int usLeftTrigPin = 30;
+const int usLeftEchoPin = 42;
+const int usRightTrigPin = 31;
+const int usRightEchoPin = 43;
 
 //====================Output Variables...... AND FUNCTIONS=====================
 //The variables that other modues will use
@@ -43,28 +42,28 @@ boolean isFloor(void) { return floorSwitch; }
 
 //IR Sensors
 int ir1ReadingSize = 9;
-int ir1RawVals[9] = {565, 515, 450, 391, 340, 293, 233, 185, 130};  //Raw ir values at each distance.
-int ir1DisVals[9] = {150, 200, 250, 300, 350 ,400, 500, 600, 800};  //Distance in mm
+int ir1RawVals[9] = {453, 326, 245, 205, 160, 125, 105, 85, 65};  //Raw ir values at each distance.
+int ir1DisVals[9] = {100, 150, 200, 250, 300, 400, 500, 600, 800};  //Distance in mm
 
 int ir2ReadingSize = 8;
-int ir2RawVals[8] = {455, 325, 255, 209, 175, 130, 97, 50};  //Raw ir values at each distance.
-int ir2DisVals[8] = {100, 150, 200, 250, 300, 400, 500, 800};  //Distance in mm
+int ir2RawVals[9] = {475, 340, 263, 230, 190, 139, 100, 80, 45};  //Raw ir values at each distance.
+int ir2DisVals[9] = {100, 150, 200, 250, 300, 400, 500, 600, 800};  //Distance in mm
 
 int ir3ReadingSize = 8;
-int ir3RawVals[8] = {455, 323, 253, 206, 173, 125, 89, 30};  //Raw ir values at each distance.
-int ir3DisVals[8] = {100, 150, 200, 250, 300, 400, 500, 800};  //Distance in mm
+int ir3RawVals[7] = {539, 500, 395, 306, 255, 190, 150};  //Raw ir values at each distance.
+int ir3DisVals[7] = {250, 300, 400, 500, 600, 800, 1000};  //Distance in mm
 
 int ir4ReadingSize = 8;
-int ir4RawVals[8] = {449, 316, 247, 202, 172, 128, 92, 65};  //Raw ir values at each distance.
-int ir4DisVals[8] = {100, 150, 200, 250, 300, 400, 500, 800};  //Distance in mm
+int ir4RawVals[9] = {467, 338, 279, 220, 195, 151, 110, 85, 35};  //Raw ir values at each distance.
+int ir4DisVals[9] = {100, 150, 200, 250, 300, 400, 500, 600, 800};  //Distance in mm
 
 int ir5ReadingSize = 9;
-int ir5RawVals[9] = {540, 500, 450, 395, 343, 300, 240, 200, 125};  //Raw ir values at each distance.
-int ir5DisVals[9] = {150, 200, 250, 300, 350, 400, 500, 600, 800};  //Distance in mm
+int ir5RawVals[9] = {448, 328, 238, 185, 155, 119, 99, 85, 60};  //Raw ir values at each distance.
+int ir5DisVals[9] = {100, 150, 200, 250, 300, 400, 500, 600, 800};  //Distance in mm
 
-int irTopReadingSize = 8;
-int irTopRawVals[8] = {518, 363, 281, 235, 203, 190, 130, 50};  //Raw ir values at each distance.
-int irTopDisVals[8] = {100, 150, 200, 250, 300, 400, 500, 800};  //Distance in mm
+int ir6ReadingSize = 8;
+int ir6RawVals[8] = {500, 446, 390, 302, 245, 205, 160, 140};  //Raw ir values at each distance.
+int ir6DisVals[8] = {200, 250, 300, 400, 500, 600, 800, 1000};  //Distance in mm
 
 
 
@@ -113,9 +112,9 @@ int getIR5(void) {
   return calculateIrInMM(avg, ir5ReadingSize, ir5RawVals, ir5DisVals); 
 }
 
-int irTop = 0;
-int getIRTopRaw(void) { return irTop; }
-int getIRTop(void) { return calculateIrInMM(irTop, irTopReadingSize, irTopRawVals, irTopDisVals); }
+int ir6 = 0;
+int getIR6Raw(void) { return ir6; }
+int getIR6(void) { return calculateIrInMM(ir6, ir6ReadingSize, ir6RawVals, ir6DisVals); }
 
 //US Sensors
 int usLeft = 0;
@@ -145,8 +144,8 @@ void setupSensors(void) {
   pinMode(ir3Pin, INPUT);
   pinMode(ir4Pin, INPUT);
   pinMode(ir5Pin, INPUT);
-  pinMode(irTopPin, INPUT);
-  //pinMode(irTopPin, INPUT);
+  pinMode(ir6Pin, INPUT);
+  //pinMode(ir6Pin, INPUT);
 
   //US sensors
   pinMode(usLeftTrigPin, OUTPUT);
@@ -155,7 +154,7 @@ void setupSensors(void) {
   pinMode(usRightEchoPin, INPUT);
   digitalWrite(usLeftTrigPin, LOW);
   digitalWrite(usRightTrigPin, LOW);
-//  pinMode(usTopPin, INPUT);
+//  pinMode(us6Pin, INPUT);
 }
 
 //====================UPDATE SENSORS====================
@@ -191,19 +190,19 @@ void updateSensors(void) {
   ir5 = analogRead(ir5Pin);
   
   
-  irTop = analogRead(irTopPin);
-  //irTop = digitalRead(irTopPin);
+  ir6 = analogRead(ir6Pin);
+  //ir6 = digitalRead(ir6Pin);
   
-  //usTop = analogRead(usTopPin);
+  //us6 = analogRead(us6Pin);
 }
 
 //====================UPDATE US SENSORS====================
 //Updates the US sensors as they are not updates in the main update
 void updateUS(void) {
-  usLeftDuration = getUSDuration(usLeftEchoPin, usLeftTrigPin);
-  delay(20);
   usRightDuration = getUSDuration(usRightEchoPin, usRightTrigPin);
-
+  delay(30);
+  usLeftDuration = getUSDuration(usLeftEchoPin, usLeftTrigPin);
+  
   usLeft = msToMM(usLeftDuration);
   usRight = msToMM(usRightDuration);
 }
@@ -213,7 +212,7 @@ void updateUS(void) {
 //Converts the value from a ultrasonic sensor sensor to mm, -1 is returnd if the value is too far away to read.
 int msToMM(long microseconds)
 {
-  return microseconds / 3 / 2;
+  return microseconds / 6;
 }
 
 long getUSDuration(int echoPin, int trigPin) {
