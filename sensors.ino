@@ -199,9 +199,11 @@ void updateSensors(void) {
 //====================UPDATE US SENSORS====================
 //Updates the US sensors as they are not updates in the main update
 void updateUS(void) {
-  usRightDuration = getUSDuration(usRightEchoPin, usRightTrigPin);
-  delay(30);
+  
+  
   usLeftDuration = getUSDuration(usLeftEchoPin, usLeftTrigPin);
+  delay(40);
+  usRightDuration = getUSDuration(usRightEchoPin, usRightTrigPin);
   
   usLeft = msToMM(usLeftDuration);
   usRight = msToMM(usRightDuration);

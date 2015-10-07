@@ -2,7 +2,7 @@
 
 //====================PINS====================
 //LEDS
-const int ledWarningPin = 29;  //TODO find pin for this
+const int ledWarningPin = 29;
 const int led1 = 26;
 const int led2 = 27;
 const int led3 = 28;

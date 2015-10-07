@@ -9,19 +9,10 @@ void testingCode(){
   setupSensors();
   setupSimpleOutputs();
   setupDCMotor();
-  testingOutputUsSensorsInMM();
+  //testingOutputUsSensorsInMM();
 //  testWallFollow();
   
-  //testWeightDetect();
-}
-
-void testWallFollow(void) {
-  
-  while(1)
-  setBothMotor(50);
-  
-  
-  
+  testWeightDetect();
 }
 
 
@@ -30,18 +21,26 @@ void testingOutputUsSensorsInMM(){
   int tick = 0;
   unsigned long echoTime = millis();
   while (true){
-    //delay(500);
+    delay(500);
     updateUS();
-    setupSimpleOutputs();
-    /*
     tick++;
     output = "===";
     output += "\nR: " + String(getUsRight());
     output += "\nL: " + String(getUsLeft());
     Serial.println(output);
     echoTime = millis();
-    */
     
+  }
+}
+
+void testWallFollow(){
+  String output = "";
+  int tick = 0;
+  unsigned long echoTime = millis();
+  while (true){
+    //delay(500);
+    updateUS();
+    setupSimpleOutputs();  
     
     if(getUsLeft() < 320 && getUsRight() < 320 && getUsLeft() > 20 && getUsRight() > 20) {
       getOutOfHere();
@@ -52,20 +51,20 @@ void testingOutputUsSensorsInMM(){
       digitalWrite(led1, HIGH);
       turnLeftSharp();
       digitalWrite(led1, LOW);
-    } else if (getUsLeft() < 500) {
-      setLeftMotor((500 - getUsLeft()) / 5);
-    } else if (getUsLeft() > 500){
+    } else if (getUsLeft() < 600) {
+      setLeftMotor((getUsLeft() - 250) / 5);
+    } else if (getUsLeft() > 600 || getUsRight() < 50){
       setLeftMotor(50);
     } else
     
-    if (getUsRight() < 250 && getUsRight() > 50) {
+    if (getUsRight() < 300 && getUsRight() > 50) {
       digitalWrite(led2, HIGH);
       turnRightSharp();
       updateUS();
       digitalWrite(led2, LOW);
-    } else if (getUsRight() < 500) {
-      setRightMotor((500 - getUsRight()) / 5);
-    }  else {
+    } else if (getUsRight() < 600) {
+      setRightMotor((getUsRight() - 250) / 5);
+    }  else if (getUsRight() > 600 || getUsRight() < 50){
       setRightMotor(50);
     }
     

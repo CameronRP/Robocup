@@ -7,8 +7,8 @@
 //To test code, set testing to true. This will run the testingCode() function in testing.ino. Go to testing.ino for more info.
 //You will probably also want serial set to true.
 //===================================================================
-boolean testing = true;
-boolean serial = true;
+boolean testing = false;
+boolean serial = false;
 
 
 
@@ -19,6 +19,8 @@ State state = SEARCHING;  //state to start in.
 
 void setup(){
   setupSensors();
+  setupSimpleOutputs();
+  setupDCMotor();
   if (serial) { Serial.begin(9600); }
   if (testing) { testingCode(); }
 }
@@ -28,7 +30,8 @@ void loop(){
   updateMotors();
   switch (state){
     case SEARCHING:
-      //searching();
+      wallFollow();
+      //testWeightDetect();
       break;
     case DETECTED:
       detected();
@@ -68,6 +71,36 @@ void errorFunction(String message){
 void initialHindering(void){
 
 }
+
+
+
+
+void wallFollow(){
+  int tick = 0;
+  unsigned long echoTime = millis();
+ 
+  updateUS();   
+  if(getUsLeft() < 320 && getUsRight() < 320 && getUsLeft() > 20 && getUsRight() > 20) {
+    getOutOfHere();
+  } else 
+  
+  if (getUsLeft() < 250 && (getUsLeft() > 50)) {
+    turnLeftSharp();
+  } else if ((getUsLeft() < 600) && millis() > getLeftMotorStopTime()) {
+    setLeftMotor((getUsLeft() - 250) / 5);
+  } else if ((getUsLeft() > 600 || getUsLeft() < 50) && millis() > getLeftMotorStopTime()){
+    leftMotor(50, -1);
+  } else
+  
+  if (getUsRight() < 300 && getUsRight() > 50) {
+    turnRightSharp();
+  } else if ((getUsRight() < 600) && millis() > getRightMotorStopTime()) {
+    setRightMotor((getUsRight() - 250) / 5);
+  }  else if ((getUsRight() > 600 || getUsRight() < 50) && millis() > getRightMotorStopTime()){
+    rightMotor(45, -1);
+  }
+}
+
 /*
 //====================================================================================
 //Wall following
@@ -195,4 +228,29 @@ void justLostSightOfFood(void){
 //Picking up food
 void pickUpFood(void){
   //TODO
+}
+
+void getOutOfHere(void) {
+  
+  int number = (int) millis();
+  int dur = (number % 200) + 800;
+  digitalWrite(28, HIGH);
+  
+  if ((number % 2) == 1) {
+    digitalWrite(26, HIGH);
+    
+    rightMotor(-60, dur);
+    leftMotor(20, dur);
+    delay(dur);
+    digitalWrite(26, LOW);
+  } else {
+    digitalWrite(27, HIGH);
+    setRightMotor(20);
+    setLeftMotor(-60);
+    delay(dur);
+    digitalWrite(27, LOW);
+  }
+  
+  setBothMotor(40);
+  digitalWrite(28, LOW);
 }
