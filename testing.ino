@@ -12,9 +12,16 @@ void testingCode(){
   //testingOutputUsSensorsInMM();
 //  testWallFollow();
   
-  testWeightDetect();
+  testThis();
 }
 
+void testThis(void){
+  while(true){
+    updateUS();
+    Serial.println(getUsRight());
+  }
+
+}
 
 void testingOutputUsSensorsInMM(){
   String output = "";

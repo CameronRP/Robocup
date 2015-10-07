@@ -21,6 +21,7 @@ void setLedWarning(boolean b){
 }
 
 void updateLights(void) {
-  digitalWrite(led1, isLeftMotorMovingFixTime());
-  digitalWrite(led2, isRightMotorMovingFixTime());
+  digitalWrite(led1, weightAtLeft());
+  digitalWrite(led2, weightAtRight());
+  digitalWrite(led3, weightAtMid());
 }

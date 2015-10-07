@@ -1,21 +1,15 @@
-
-const int eL = 100;
-const int eR = 120;
+/*
 const int eM = 150;
 
 const int weightDetectLoopIterations = 20;
 const int REQUIRED_WEIGHT_DUTY_CYCLE = 19; // needs to be less than the above variable
 
-int weightDetect(void){
-  
-  int leftCount = 0;
-  int rightCount = 0;
+boolean weightMid = false;
+
+void midWeightDetect(void) {
+
   int midCount = 0;
   int i = 0;
-  
-  boolean weightLeft = false;
-  boolean weightRight = false;
-  boolean weightMid = false;
   
   while(i++ < weightDetectLoopIterations) {
     //delay(500);
@@ -32,7 +26,65 @@ int weightDetect(void){
       output += "\n\n3: " + String(getIR3Raw());
       output += "\n6: " + String(getIR6Raw());
     }
-    */
+    
+
+    //int errorM = (abs(getIR3Raw()-getIR6Raw())*100)/max(getIR3Raw(), getIR6Raw());
+    int errorM = (abs(getIR3()-getIR6()));
+    //boolean weightM = errorM > eM;
+    boolean weightM = errorM > eM && (getIR6() != -1);
+    //output += "\n%DifM: " + String(errorM);
+
+    if (weightM) {
+      midCount++;
+    } 
+    
+    if (serial) {
+      Serial.print("\ni = ");
+      Serial.println(i);
+      Serial.print("midcount = ");
+      Serial.println(midCount);
+    }
+        
+  }
+  
+  if (midCount >= REQUIRED_WEIGHT_DUTY_CYCLE) {
+    weightMid =  true;
+  } else { weightMid =  false; }
+}  
+
+boolean weightAtMid(void) {
+  return weightMid;
+}
+
+  
+/*
+int weightDetect(void){
+  
+  int leftCount = 0;
+  int rightCount = 0;
+  int midCount = 0;
+  int i = 0;
+  
+  boolean weightLeft = false;
+  boolean weightRight = false;
+  boolean weightMid = false;
+  
+  while(i++ < weightDetectLoopIterations) {
+    //delay(500);
+    updateSensors();
+    
+    
+    if (serial) {
+      delay(500);
+      output = "===";
+      output += "\n1: " + String(getIR1Raw());
+      output += "\n2: " + String(getIR2Raw());
+      output += "\n\n4: " + String(getIR4Raw());
+      output += "\n5: " + String(getIR5Raw());
+      output += "\n\n3: " + String(getIR3Raw());
+      output += "\n6: " + String(getIR6Raw());
+    }
+    
     
     //int errorL = (abs(getIR1Raw()-getIR2Raw())*100)/max(getIR1Raw(), getIR2Raw());
     int errorLMM = (abs(getIR1()-getIR2()));
@@ -60,14 +112,16 @@ int weightDetect(void){
       midCount++;
     } 
     
-    Serial.print("\ni = ");
-    Serial.println(i);
-    Serial.print("leftcount = ");
-    Serial.println(leftCount);
-    Serial.print("rightcount = ");
-    Serial.println(rightCount);
-    Serial.print("midcount = ");
-    Serial.println(midCount);
+    if (serial) {
+      Serial.print("\ni = ");
+      Serial.println(i);
+      Serial.print("leftcount = ");
+      Serial.println(leftCount);
+      Serial.print("rightcount = ");
+      Serial.println(rightCount);
+      Serial.print("midcount = ");
+      Serial.println(midCount);
+    }
         
   }
   if (leftCount >= REQUIRED_WEIGHT_DUTY_CYCLE) {
@@ -111,3 +165,4 @@ int weightDetect(void){
     return -1;
   }
 }
+*/

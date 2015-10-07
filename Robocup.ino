@@ -8,8 +8,8 @@
 //To test code, set testing to true. This will run the testingCode() function in testing.ino. Go to testing.ino for more info.
 //You will probably also want serial set to true.
 //===================================================================
-boolean testing = false;
-boolean serial = false;
+boolean testing = true;
+boolean serial = true;
 
 
 int weightLocation = 0;
@@ -25,10 +25,11 @@ void setup(){
   setupSensors();
   setupSimpleOutputs();
   setupDCMotor();
+  setupSensorLogic();
   
   if (serial) { Serial.begin(9600); }
   if (testing) { testingCode(); }
-  bothMotors(50, -1);
+  bothMotors(0, -1);
 }
 
 void loop(){
@@ -36,15 +37,17 @@ void loop(){
   pulseUsSensors();
   updateMotors();
   updateLights();
+  //midWeightDetect();
+  updateSensorLogic();
   switch (state){
     case SEARCHING:
-      weightLocation = weightDetect();
-      wallFollow();
-      Serial.print("\nWeight Location = ");
-      Serial.println(weightLocation);
-      if (weightLocation > 0) {
-        state = DETECTED;
+      bothMotors(0, -1);
+      //wallFollow();
+      if (serial) {
+        Serial.print("\nWeight Location = ");
+        Serial.println(weightLocation);
       }
+      
       break;
     case DETECTED:
       detected();
