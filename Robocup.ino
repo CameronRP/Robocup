@@ -3,12 +3,16 @@
 #include <math.h>
 #include <Servo.h>
 
+
 //=================TESTING AND SERIAL CODE ON===================================
 //To test code, set testing to true. This will run the testingCode() function in testing.ino. Go to testing.ino for more info.
 //You will probably also want serial set to true.
 //===================================================================
 boolean testing = false;
 boolean serial = false;
+
+
+int weightLocation = 0;
 
 
 
@@ -21,17 +25,26 @@ void setup(){
   setupSensors();
   setupSimpleOutputs();
   setupDCMotor();
+  
   if (serial) { Serial.begin(9600); }
   if (testing) { testingCode(); }
+  bothMotors(50, -1);
 }
 
 void loop(){
   updateSensors();
+  pulseUsSensors();
   updateMotors();
+  updateLights();
   switch (state){
     case SEARCHING:
+      weightLocation = weightDetect();
       wallFollow();
-      //testWeightDetect();
+      Serial.print("\nWeight Location = ");
+      Serial.println(weightLocation);
+      if (weightLocation > 0) {
+        state = DETECTED;
+      }
       break;
     case DETECTED:
       detected();
@@ -56,7 +69,9 @@ void loop(){
 }
 
 void errorFunction(String message){
-  Serial.begin(9600);
+  Serial.println(message);
+  Serial.println("Just some text in here in case the message isn't coming through properly");
+  if (!serial) {Serial.begin(9600); }
   while (true) {
     Serial.println(message);
     setLedWarning(true);
@@ -76,28 +91,27 @@ void initialHindering(void){
 
 
 void wallFollow(){
-  int tick = 0;
-  unsigned long echoTime = millis();
+  
  
   updateUS();   
   if(getUsLeft() < 320 && getUsRight() < 320 && getUsLeft() > 20 && getUsRight() > 20) {
     getOutOfHere();
   } else 
   
-  if (getUsLeft() < 250 && (getUsLeft() > 50)) {
+  if (getUsLeft() < 250 && (getUsLeft() > 20)) {
     turnLeftSharp();
-  } else if ((getUsLeft() < 600) && millis() > getLeftMotorStopTime()) {
+  } else if ((getUsLeft() < 600) && millis() > getLeftMotorStopTime() && getUsLeft() > 20) {
     setLeftMotor((getUsLeft() - 250) / 5);
-  } else if ((getUsLeft() > 600 || getUsLeft() < 50) && millis() > getLeftMotorStopTime()){
+  } else if ((getUsLeft() > 500 || getUsLeft() < 20) && millis() > getLeftMotorStopTime()){
     leftMotor(50, -1);
   } else
   
-  if (getUsRight() < 300 && getUsRight() > 50) {
+  if (getUsRight() < 250 && getUsRight() > 20) {
     turnRightSharp();
-  } else if ((getUsRight() < 600) && millis() > getRightMotorStopTime()) {
+  } else if ((getUsRight() < 500) && millis() > getRightMotorStopTime() && getUsRight() > 20) {
     setRightMotor((getUsRight() - 250) / 5);
-  }  else if ((getUsRight() > 600 || getUsRight() < 50) && millis() > getRightMotorStopTime()){
-    rightMotor(45, -1);
+  }  else if ((getUsRight() > 500 || getUsRight() < 20) && millis() > getRightMotorStopTime()){
+    rightMotor(40, -1);
   }
 }
 
@@ -215,7 +229,11 @@ void findNewSearchSpot(void){
 //=======================================================================================
 //Food is detected
 void detected(void){
-  //TODO
+  bothMotors(0, -1);
+  digitalWrite(26, HIGH);
+  digitalWrite(27, HIGH);
+  digitalWrite(28, HIGH);
+  digitalWrite(25 + weightLocation, LOW);
 }
 
 //======================================================================================
@@ -239,14 +257,14 @@ void getOutOfHere(void) {
   if ((number % 2) == 1) {
     digitalWrite(26, HIGH);
     
-    rightMotor(-60, dur);
-    leftMotor(20, dur);
+    setRightMotor(-50);
+    setLeftMotor(20);
     delay(dur);
     digitalWrite(26, LOW);
   } else {
     digitalWrite(27, HIGH);
     setRightMotor(20);
-    setLeftMotor(-60);
+    setLeftMotor(-50);
     delay(dur);
     digitalWrite(27, LOW);
   }

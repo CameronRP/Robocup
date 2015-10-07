@@ -254,6 +254,18 @@ int calculateIrInMM(int rawVal, int readingsSize, int* rawArray, int* disArray){
   return -1;
 }
 
+
+void pulseUsSensors(void) {
+  digitalWrite(usLeftTrigPin, LOW);
+  digitalWrite(usRightTrigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(usLeftTrigPin, HIGH);
+  digitalWrite(usRightTrigPin, HIGH);
+  delayMicroseconds(5);
+  digitalWrite(usLeftTrigPin, LOW);
+  digitalWrite(usRightTrigPin, LOW);
+}
+
 // Returns the US reading
 // Error -1 is 3 values, 1st greater than 700,
 /*
