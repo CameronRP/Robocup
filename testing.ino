@@ -85,7 +85,7 @@ void testWeightDetect(void){
   while(true){
     //delay(500);
     updateSensors();
-    if (commenting) {
+    if (serial) {
       delay(500);
       output = "===";
       output += "\n1: " + String(getIR1Raw());
@@ -102,7 +102,7 @@ void testWeightDetect(void){
     //boolean weightL = errorL > eL;
     boolean weightLMM = (errorLMM > eL) && (getIR2() != -1);
     //output += "\n%DifL: " + String(errorL);
-    if (commenting) {
+    if (serial) {
       output += "\n%DifLmm: " + String(errorLMM);
       output += "\nWeightL: " + String((boolean) weightLMM);
     }
@@ -112,7 +112,7 @@ void testWeightDetect(void){
     //boolean weightR = errorR > eR;
     boolean weightRMM = errorRMM > eR && (getIR4() != -1);
     //output += "\n%DifR: " + String(errorR);
-    if (commenting) {
+    if (serial) {
       output += "\n%DifRmm: " + String(errorRMM);
       output += "\nWeightR: " + String((boolean) weightRMM);
     }
@@ -122,7 +122,7 @@ void testWeightDetect(void){
     //boolean weightM = errorM > eM;
     boolean weightMMM = errorMMM > eM && (getIR6() != -1);
     //output += "\n%DifM: " + String(errorM);
-    if (commenting) {
+    if (serial) {
       output += "\n%DifMmm: " + String(errorMMM);
       output += "\nWeightM: " + String((boolean) weightMMM);
       Serial.println(output);
@@ -376,12 +376,12 @@ void testingAngleToWall(void){
       diff = getIR4()-getIR2();
       output = "===";
       output += "\nD: " + String(diff);
-      output += "\nS: " + String(atan2(diff, 110));
+      //output += "\nS: " + String(atan2(diff, 110));
     } else {
       diff = getIR5()-getIR1();
       output = "===";
       output += "\nD: " + String(diff);
-      output += "\nL: " + String(atan2(diff, 230));
+      //output += "\nL: " + String(atan2(diff, 230));
     }
     Serial.println(output);
   }
@@ -397,7 +397,7 @@ void testingAngleToWallUsingLongIr(void) {
     diff = getIR5()-getIR1();
     output = "===";
     output += "\nD: " + String(diff);
-    output += "\nA: " + String(atan2(diff, 230));
+    //output += "\nA: " + String(atan2(diff, 230));
     Serial.println(output);
   }
 }
@@ -412,7 +412,7 @@ void testingAngleToWallUsingShortIr(void) {
     diff = getIR4()-getIR2();
     output = "===";
     output += "\nD: " + String(diff);
-    output += "\nA: " + String(atan2(diff, 110));
+    //output += "\nA: " + String(atan2(diff, 110));
     Serial.println(output);
   }
 }

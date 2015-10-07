@@ -187,13 +187,13 @@ void setBothMotor(int value) {
 
 void turnLeftSharp(void) {
   
-  leftMotor(-40, 300);
-  rightMotor(40, 300);
+  leftMotor(-40, 150);
+  rightMotor(40, 150);
 }
 
 void turnRightSharp(void) {
-  setRightMotor(-40);
-  setLeftMotor(40);
+  rightMotor(-40, 150);
+  leftMotor(40, 150);
 }
 
 

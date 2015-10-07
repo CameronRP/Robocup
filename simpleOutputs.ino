@@ -19,3 +19,8 @@ void setupSimpleOutputs(void){
 void setLedWarning(boolean b){
   digitalWrite(ledWarningPin, b);
 }
+
+void updateLights(void) {
+  digitalWrite(led1, isLeftMotorMovingFixTime());
+  digitalWrite(led2, isRightMotorMovingFixTime());
+}
