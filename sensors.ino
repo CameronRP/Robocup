@@ -66,23 +66,28 @@ int ir6RawVals[8] = {500, 446, 390, 302, 245, 205, 160, 140};  //Raw ir values a
 int ir6DisVals[8] = {200, 250, 300, 400, 500, 600, 800, 1000};  //Distance in mm
 
 
+#define SHORT_IR_ERROR_FROM_AVG 40
 
 int ir1 = 0;
-int ir1_2 = 0;
-int ir1_3 = 0;
+RunningAverage* ir1RA = new RunningAverage(10);
 int getIR1Raw(void) { return ir1; }
 int getIR1(void) { 
-  int avg = (ir1+ir1_2+ir1_3)/3;
-  return calculateIrInMM(avg, ir1ReadingSize, ir1RawVals, ir1DisVals); \
+  if (abs(ir1 - ir1RA->getAverage()) > SHORT_IR_ERROR_FROM_AVG) {
+    return -1;
+  } else {
+    return ir1RA->getAverage(); 
+  }
 }
 
 int ir2 = 0;
-int ir2_2 = 0;
-int ir2_3 = 0;
+RunningAverage* ir2RA = new RunningAverage(10);
 int getIR2Raw(void) { return ir2; }
 int getIR2(void) { 
-  int avg = (ir2+ir2_2+ir2_3)/3;
-  return calculateIrInMM(avg, ir2ReadingSize, ir2RawVals, ir2DisVals); 
+  if (abs(ir2 - ir2RA->getAverage()) > SHORT_IR_ERROR_FROM_AVG) {
+    return -1;
+  } else {
+    return ir2RA->getAverage(); 
+  }
 }
 
 int ir3 = 0;
@@ -95,21 +100,25 @@ int getIR3(void) {
 }
 
 int ir4 = 0;
-int ir4_2 = 0;
-int ir4_3 = 0;
+RunningAverage* ir4RA = new RunningAverage(10);
 int getIR4Raw(void) { return ir4; }
 int getIR4(void) { 
-  int avg = (ir4+ir4_2+ir4_3)/3;
-  return calculateIrInMM(avg, ir4ReadingSize, ir4RawVals, ir4DisVals); 
+  if (abs(ir4 - ir4RA->getAverage()) > SHORT_IR_ERROR_FROM_AVG) {
+    return -1;
+  } else {
+    return ir4RA->getAverage(); 
+  }
 }
 
 int ir5 = 0;
-int ir5_2 = 0;
-int ir5_3 = 0;
+RunningAverage* ir5RA = new RunningAverage(10);
 int getIR5Raw(void) { return ir5; }
 int getIR5(void) { 
-  int avg = (ir5+ir5_2+ir5_3)/3;
-  return calculateIrInMM(avg, ir5ReadingSize, ir5RawVals, ir5DisVals); 
+  if (abs(ir5 - ir5RA->getAverage()) > SHORT_IR_ERROR_FROM_AVG) {
+    return -1;
+  } else {
+    return ir5RA->getAverage(); 
+  }
 }
 
 int ir6 = 0;
@@ -145,6 +154,10 @@ void setupSensors(void) {
   pinMode(ir4Pin, INPUT);
   pinMode(ir5Pin, INPUT);
   pinMode(ir6Pin, INPUT);
+  ir1RA->clear();
+  ir2RA->clear();
+  ir4RA->clear();
+  ir5RA->clear();
   //pinMode(ir6Pin, INPUT);
 
   //US sensors
@@ -169,26 +182,22 @@ void updateSensors(void) {
   floorSwitch = digitalRead(floorSwitchPin);
 
   //Updating IR Sensors
-  ir1_3 = ir1_2;
-  ir1_2 = ir1;
+
   ir1 = analogRead(ir1Pin);
+  ir1RA->addValue(ir1);
   
-  ir2_3 = ir2_2;
-  ir2_2 = ir2;
+
   ir2 = analogRead(ir2Pin);
-  
-  ir3_3 = ir3_2;
-  ir3_2 = ir3;
+  ir2RA->addValue(ir2);
+
   ir3 = analogRead(ir3Pin);
   
-  ir4_3 = ir4_2;
-  ir4_2 = ir4;
+
   ir4 = analogRead(ir4Pin);
-  
-  ir5_3 = ir5_2;
-  ir5_2 = ir5;
+  ir4RA->addValue(ir4);
+
   ir5 = analogRead(ir5Pin);
-  
+  ir5RA->addValue(ir5);
   
   ir6 = analogRead(ir6Pin);
   //ir6 = digitalRead(ir6Pin);
