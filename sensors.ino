@@ -23,8 +23,8 @@ const int ir6Pin = A7;  //Middle lower
 //US snesors Pins
 const int usLeftTrigPin = 30;
 const int usLeftEchoPin = 42;
-const int usRightTrigPin = 31;
-const int usRightEchoPin = 43;
+const int usRightTrigPin = 25;
+const int usRightEchoPin = 20;
 
 //====================Output Variables...... AND FUNCTIONS=====================
 //The variables that other modues will use
@@ -240,18 +240,21 @@ int msToMM(long microseconds)
 }
 
 long getUSDuration(int echoPin, int trigPin) {
-  // The PING))) is triggered by a HIGH pulse of 2 or more microseconds.
-  // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
   digitalWrite(trigPin, LOW);
   delayMicroseconds(2);
   digitalWrite(trigPin, HIGH);
-  delayMicroseconds(5);
+  delayMicroseconds(2);
   digitalWrite(trigPin, LOW);
-
-  // The same pin is used to read the signal from the PING))): a HIGH
-  // pulse whose duration is the time (in microseconds) from the sending
-  // of the ping to the reception of its echo off of an object.
-//  ulong
+  /*
+  pulse();
+  pulse();
+  pulse();
+  pulse();
+  pulse();
+  pulse();
+  pulse();
+  pulse();
+  */
   return pulseIn(echoPin, HIGH, US_TIMEOUT);
 }
 

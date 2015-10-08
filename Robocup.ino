@@ -22,6 +22,7 @@ State state = SEARCHING;  //state to start in.
 
 
 void setup(){
+  
   setupSensors();
   setupSimpleOutputs();
   setupDCMotor();
@@ -29,6 +30,7 @@ void setup(){
   
   if (serial) { Serial.begin(9600); }
   if (testing) { testingCode(); }
+  
   bothMotors(0, -1);
 }
 

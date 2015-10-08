@@ -17,6 +17,21 @@ boolean rightMotorMovingFixTime = false;    //True if the right motor has been s
 const int left_motor = 11;
 const int right_motor = 10;
 
+//============boolean countdown timers============
+boolean turningToWeightAtRight;
+boolean isTurningToWeightAtRight(void) { return turningToWeightAtRight; };
+long turningToWeightAtRightStopTime = 0;
+
+boolean turningToWeightAtLeft;
+boolean isTurningToWeightAtLeft(void) { return turningToWeightAtLeft; };
+long turningToWeightAtLeftStopTime = 0;
+
+boolean turningToWeight(void) {
+  return (turningToWeightAtLeft || turningToWeightAtRight);
+}
+
+
+
 Servo leftMotorServo;
 Servo rightMotorServo;
 
@@ -29,9 +44,20 @@ void setupDCMotor(void) {
 }
 
 
+
 void updateMotors(){
   
   long time = millis();
+  
+  //Update turnign booleans
+  if (turningToWeightAtRight && turningToWeightAtRightStopTime < time){
+    turningToWeightAtRight = false;
+  }
+  if (turningToWeightAtLeft && turningToWeightAtLeftStopTime < time){
+    turningToWeightAtLeft = false;
+  }
+  
+  
   //Update left motor
   if (leftMotorGoalPower != leftMotorActualPower || (time >= leftMotorStopTime && leftMotorMovingFixTime)){
     //Left motor value needs to be updated
@@ -67,6 +93,22 @@ void updateMotors(){
     }
   }
 }
+
+
+void turnToWeightAtLeft(void){
+  int duration = getIR2()*2+50;
+  leftMotor(-40, duration);
+  rightMotor(60, duration);
+  turningToWeightAtRightStopTime = millis() + duration;
+}
+
+void turnToWeightAtRight(void){
+  int duration = getIR4()*2+50;
+  leftMotor(60, duration);
+  rightMotor(-40, duration);
+  turningToWeightAtLeftStopTime = millis() + duration;
+}
+
 
 void leftMotor(int power, long duration){
   if (duration == -1){
