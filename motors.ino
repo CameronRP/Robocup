@@ -18,11 +18,11 @@ const int left_motor = 11;
 const int right_motor = 10;
 
 //============boolean countdown timers============
-boolean turningToWeightAtRight;
+boolean turningToWeightAtRight = false;
 boolean isTurningToWeightAtRight(void) { return turningToWeightAtRight; };
 long turningToWeightAtRightStopTime = 0;
 
-boolean turningToWeightAtLeft;
+boolean turningToWeightAtLeft = false;
 boolean isTurningToWeightAtLeft(void) { return turningToWeightAtLeft; };
 long turningToWeightAtLeftStopTime = 0;
 
@@ -66,47 +66,42 @@ void updateMotors(){
       Serial.println(leftMotorGoalPower);
     }
     if (time >= leftMotorStopTime && leftMotorMovingFixTime){
-      stopLeftMotor();
-      leftMotorActualPower = 0;
+      leftMotorGoalPower = 0;
       leftMotorMovingFixTime = false;
-    } else {
-      setLeftMotor(leftMotorGoalPower);
-      leftMotorActualPower = leftMotorGoalPower;
-    }
+    } 
+    setLeftMotor(leftMotorGoalPower);
+    leftMotorActualPower = leftMotorGoalPower;
   }
   
   //Update right motor
-  if (leftMotorGoalPower != rightMotorActualPower || (time >= rightMotorStopTime && rightMotorMovingFixTime)){
+  if (rightMotorGoalPower != rightMotorActualPower || (time >= rightMotorStopTime && rightMotorMovingFixTime)){
     //right motor value needs to be updated
     if (serial) {
       Serial.print("Updating R motor to value of: ");
     }
     if (time >= rightMotorStopTime && rightMotorMovingFixTime){
-      if (serial) {Serial.println("0");}  
-      stopRightMotor();
-      rightMotorActualPower = 0;
+      rightMotorGoalPower = 0;
       rightMotorMovingFixTime = false;
-    } else {
-      if (serial) {Serial.println(rightMotorGoalPower);}
-      setRightMotor(rightMotorGoalPower);
-      rightMotorActualPower = rightMotorGoalPower;
     }
+    setRightMotor(rightMotorGoalPower);
+    rightMotorActualPower = rightMotorGoalPower;
+    
   }
 }
 
 
 void turnToWeightAtLeft(void){
   int duration = getIR2()*2+50;
-  leftMotor(-40, duration);
-  rightMotor(60, duration);
-  turningToWeightAtRightStopTime = millis() + duration;
+  leftMotor(-40, 200);
+  rightMotor(60, 200);
+  turningToWeightAtRightStopTime = millis() + 200;
 }
 
 void turnToWeightAtRight(void){
   int duration = getIR4()*2+50;
-  leftMotor(60, duration);
-  rightMotor(-40, duration);
-  turningToWeightAtLeftStopTime = millis() + duration;
+  leftMotor(60, 200);
+  rightMotor(-40, 200);
+  turningToWeightAtLeftStopTime = millis() + 200;
 }
 
 
@@ -115,7 +110,7 @@ void leftMotor(int power, long duration){
     leftMotorMovingFixTime = false;
   } else {
     leftMotorMovingFixTime = true;
-    leftMotorStopTime = millis() + duration; // Do we want to do this here, or when the speed is actually changed....?
+    leftMotorStopTime = millis() + duration;
   }
   leftMotorGoalPower = power;
 }
@@ -125,7 +120,7 @@ void rightMotor(int power, long duration){
     rightMotorMovingFixTime = false;
   } else {
     rightMotorMovingFixTime = true;
-    rightMotorStopTime = millis() + duration; // Do we want to do this here, or when the speed is actually changed....?
+    rightMotorStopTime = millis() + duration; 
   }
   rightMotorGoalPower = power;
 }

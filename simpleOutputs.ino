@@ -22,6 +22,6 @@ void setLedWarning(boolean b){
 
 void updateLights(void) {
   digitalWrite(led1, weightAtLeft());
-  digitalWrite(led2, weightAtRight());
-  digitalWrite(led3, weightAtMid());
+  digitalWrite(led2, weightAtMid());
+  digitalWrite(led3, weightAtRight());
 }

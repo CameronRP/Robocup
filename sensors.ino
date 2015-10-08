@@ -1,7 +1,32 @@
 //This does the sensors stuff
 
 //=====================#Defines=====================
-#define US_TIMEOUT 12000  //This works to about 900mm x 3, becuase lui timesed it by 3.
+#define US_TIMEOUT 4000  //This works to about 900mm x 3, becuase lui timesed it by 3. fuck you lui
+
+#include <avr/io.h>
+#include <avr/interrupt.h>
+
+int lowEchoPin = 20;
+int highEchoPin = 21;
+int trigPin = 25;
+
+
+
+volatile long pulseStartTime = 0;
+volatile boolean lowRec = false;
+volatile boolean highRec = false;
+
+//int usPulsePin = 21;
+
+#define US_BUFFER_SIZE 5
+
+RunningAverage* usLowRA = new RunningAverage(US_BUFFER_SIZE);
+RunningAverage* usLowRAError = new RunningAverage(US_BUFFER_SIZE);
+RunningAverage* usHighRA = new RunningAverage(US_BUFFER_SIZE);
+RunningAverage* usHighRAError = new RunningAverage(US_BUFFER_SIZE);
+
+
+
 
 
 //====================Pins====================
@@ -21,10 +46,10 @@ const int ir5Pin = A10;  //Right Upper
 const int ir6Pin = A7;  //Middle lower
 
 //US snesors Pins
-const int usLeftTrigPin = 30;
-const int usLeftEchoPin = 42;
-const int usRightTrigPin = 25;
-const int usRightEchoPin = 20;
+const int usHighTrigPin = 25;
+const int usHighEchoPin = 21;
+const int usLowTrigPin = 25;
+const int usLowEchoPin = 20;
 
 //====================Output Variables...... AND FUNCTIONS=====================
 //The variables that other modues will use
@@ -72,22 +97,22 @@ int ir1 = 0;
 RunningAverage* ir1RA = new RunningAverage(10);
 int getIR1Raw(void) { return ir1; }
 int getIR1(void) { 
-  if (abs(ir1 - ir1RA->getAverage()) > SHORT_IR_ERROR_FROM_AVG) {
-    return -1;
-  } else {
+ // if (abs(ir1 - ir1RA->getAverage()) > SHORT_IR_ERROR_FROM_AVG) {
+  //  return -1;
+ // } else {
     return ir1RA->getAverage(); 
-  }
+  //}
 }
 
 int ir2 = 0;
 RunningAverage* ir2RA = new RunningAverage(10);
 int getIR2Raw(void) { return ir2; }
 int getIR2(void) { 
-  if (abs(ir2 - ir2RA->getAverage()) > SHORT_IR_ERROR_FROM_AVG) {
-    return -1;
-  } else {
+  //if (abs(ir2 - ir2RA->getAverage()) > SHORT_IR_ERROR_FROM_AVG) {
+  //  return -1;
+  //} else {
     return ir2RA->getAverage(); 
-  }
+  //}
 }
 
 int ir3 = 0;
@@ -105,22 +130,22 @@ int ir4 = 0;
 RunningAverage* ir4RA = new RunningAverage(10);
 int getIR4Raw(void) { return ir4; }
 int getIR4(void) { 
-  if (abs(ir4 - ir4RA->getAverage()) > SHORT_IR_ERROR_FROM_AVG) {
-    return -1;
-  } else {
+  //if (abs(ir4 - ir4RA->getAverage()) > SHORT_IR_ERROR_FROM_AVG) {
+  //  return -1;
+  //} else {
     return ir4RA->getAverage(); 
-  }
+  //}
 }
 
 int ir5 = 0;
 RunningAverage* ir5RA = new RunningAverage(10);
 int getIR5Raw(void) { return ir5; }
 int getIR5(void) { 
-  if (abs(ir5 - ir5RA->getAverage()) > SHORT_IR_ERROR_FROM_AVG) {
-    return -1;
-  } else {
+  //if (abs(ir5 - ir5RA->getAverage()) > SHORT_IR_ERROR_FROM_AVG) {
+  //  return -1;
+  //} else {
     return ir5RA->getAverage(); 
-  }
+  //}
 }
 
 int ir6 = 0;
@@ -135,11 +160,22 @@ int getIR6(void) {
 }
 
 //US Sensors
-int usLeft = 0;
-int getUsLeft(void) { return usLeft; }
-int usRight = 0;
-int getUsRight(void) { return usRight; }
-
+int usHigh = 0;
+int getUsHigh(void) { 
+  if (validUsHigh()){
+    return usHighRA->getAverage();  
+  } else {
+    return -1;
+  }
+}
+int usLow = 0;
+int getUsLow(void) { 
+  if (validUsLow()){
+    return usLowRA->getAverage();  
+  } else {
+    return -1;
+  }
+}
 //=====================CALCULATION VARIABLES=====================
 long usLeftDuration = 0;
 long usRightDuration = 0;
@@ -149,6 +185,21 @@ long usRightDuration = 0;
 //========================SETUP SENSORS INPUTS===================================
 void setupSensors(void) {
   Serial.println("Setting up sensors");
+  
+  pinMode(lowEchoPin, INPUT);
+  pinMode(highEchoPin, INPUT);
+  pinMode(trigPin, OUTPUT);
+  attachInterrupt(digitalPinToInterrupt(lowEchoPin), lowEcho, FALLING);
+  attachInterrupt(digitalPinToInterrupt(highEchoPin), highEcho, FALLING);
+  
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(5);
+  digitalWrite(trigPin, LOW);
+  pulseStartTime = micros();
+  
+  
   //Switches
   pinMode(limitSwitchPin, INPUT);
   pinMode(conductionSwitchPin, INPUT);
@@ -172,12 +223,14 @@ void setupSensors(void) {
   //pinMode(ir6Pin, INPUT);
 
   //US sensors
-  pinMode(usLeftTrigPin, OUTPUT);
-  pinMode(usLeftEchoPin, INPUT);
-  pinMode(usRightTrigPin, OUTPUT);
-  pinMode(usRightEchoPin, INPUT);
-  digitalWrite(usLeftTrigPin, LOW);
-  digitalWrite(usRightTrigPin, LOW);
+  /*
+  pinMode(usHighTrigPin, OUTPUT);
+  pinMode(usHighEchoPin, INPUT);
+  pinMode(usLowTrigPin, OUTPUT);
+  pinMode(usLowEchoPin, INPUT);
+  digitalWrite(usHighTrigPin, LOW);
+  digitalWrite(usLowTrigPin, LOW);
+  */
 //  pinMode(us6Pin, INPUT);
 }
 
@@ -216,6 +269,56 @@ void updateSensors(void) {
   //ir6 = digitalRead(ir6Pin);
   
   //us6 = analogRead(us6Pin);
+  
+  
+  if (lowRec && highRec) {
+    digitalWrite(trigPin, LOW);
+    delayMicroseconds(2);
+    digitalWrite(trigPin, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(trigPin, LOW);
+    pulseStartTime = micros();
+    lowRec = false;
+    highRec = false;
+  }
+}
+
+boolean validUsHigh(){
+  return (usHighRAError->getAverage() <= 3); 
+}
+
+boolean validUsLow(){
+  return (usLowRAError->getAverage() <= 3); 
+}
+
+void lowEcho(){
+  if (!lowRec){
+    long value = (micros() - pulseStartTime)/6 -80;
+    if (value < 2000){
+      usLowRA->addValue(value);
+      usLowRAError->addValue(0);
+    } else {
+      usLowRAError->addValue(US_BUFFER_SIZE);
+    }
+    lowRec = true;
+  } else {
+    Serial.println("sencodn pulse lower");
+  }
+}
+
+void highEcho(){
+  if (!highRec){
+    long value = (micros() - pulseStartTime)/6 -80;
+    if (value < 2000){
+      usHighRA->addValue(value);
+      usHighRAError->addValue(0);
+    } else {
+      usHighRAError->addValue(US_BUFFER_SIZE);
+    }
+    highRec = true;
+  } else {
+    Serial.println("sencodn pulse higher");
+  }
 }
 
 //====================UPDATE US SENSORS====================
@@ -223,12 +326,9 @@ void updateSensors(void) {
 void updateUS(void) {
   
   
-  usLeftDuration = getUSDuration(usLeftEchoPin, usLeftTrigPin);
-  delay(40);
-  usRightDuration = getUSDuration(usRightEchoPin, usRightTrigPin);
-  
-  usLeft = msToMM(usLeftDuration);
-  usRight = msToMM(usRightDuration);
+  usHigh = msToMM(getUSDuration(usHighEchoPin, usHighTrigPin));
+  delay(2);
+  usLow = msToMM(getUSDuration(usLowEchoPin, usLowTrigPin));
 }
 
 //====================Functions to read US values====================
@@ -279,7 +379,7 @@ int calculateIrInMM(int rawVal, int readingsSize, int* rawArray, int* disArray){
   return -1;
 }
 
-
+/*
 void pulseUsSensors(void) {
   digitalWrite(usLeftTrigPin, LOW);
   digitalWrite(usRightTrigPin, LOW);
@@ -290,6 +390,7 @@ void pulseUsSensors(void) {
   digitalWrite(usLeftTrigPin, LOW);
   digitalWrite(usRightTrigPin, LOW);
 }
+*/
 
 // Returns the US reading
 // Error -1 is 3 values, 1st greater than 700,

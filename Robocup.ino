@@ -36,7 +36,7 @@ void setup(){
 
 void loop(){
   updateSensors();
-  pulseUsSensors();
+  //pulseUsSensors();
   updateMotors();
   updateLights();
   //midWeightDetect();
@@ -99,23 +99,23 @@ void wallFollow(){
   
  
   updateUS();   
-  if(getUsLeft() < 320 && getUsRight() < 320 && getUsLeft() > 20 && getUsRight() > 20) {
+  if(getUsHigh() < 320 && getUsLow() < 320 && getUsHigh() > 20 && getUsLow() > 20) {
     getOutOfHere();
   } else 
   
-  if (getUsLeft() < 250 && (getUsLeft() > 20)) {
+  if (getUsHigh() < 250 && (getUsHigh() > 20)) {
     turnLeftSharp();
-  } else if ((getUsLeft() < 600) && millis() > getLeftMotorStopTime() && getUsLeft() > 20) {
-    setLeftMotor((getUsLeft() - 250) / 5);
-  } else if ((getUsLeft() > 500 || getUsLeft() < 20) && millis() > getLeftMotorStopTime()){
+  } else if ((getUsHigh() < 600) && millis() > getLeftMotorStopTime() && getUsHigh() > 20) {
+    setLeftMotor((getUsHigh() - 250) / 5);
+  } else if ((getUsHigh() > 500 || getUsHigh() < 20) && millis() > getLeftMotorStopTime()){
     leftMotor(50, -1);
   } else
   
-  if (getUsRight() < 250 && getUsRight() > 20) {
+  if (getUsLow() < 250 && getUsLow() > 20) {
     turnRightSharp();
-  } else if ((getUsRight() < 500) && millis() > getRightMotorStopTime() && getUsRight() > 20) {
-    setRightMotor((getUsRight() - 250) / 5);
-  }  else if ((getUsRight() > 500 || getUsRight() < 20) && millis() > getRightMotorStopTime()){
+  } else if ((getUsLow() < 500) && millis() > getRightMotorStopTime() && getUsLow() > 20) {
+    setRightMotor((getUsLow() - 250) / 5);
+  }  else if ((getUsLow() > 500 || getUsLow() < 20) && millis() > getRightMotorStopTime()){
     rightMotor(40, -1);
   }
 }
