@@ -1,78 +1,64 @@
 //Code to run for testing.
 
 
-/*
-int lowEchoPin = 20;
-int highEchoPin = 21;
-int trigPin = 25;
+byte gammatable[256];
 
-int usOutput = 21;
-/*
-volatile long pulseStartTime = 0;
-volatile boolean lowRec = false;
-volatile boolean highRec = false;
 
-//int usPulsePin = 21;
+Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_50MS, TCS34725_GAIN_4X);
 
-#define US_BUFFER_SIZE 5
+#define commonAnode true
 
-RunningAverage* usLowRA = new RunningAverage(US_BUFFER_SIZE);
-RunningAverage* usLowRAError = new RunningAverage(US_BUFFER_SIZE);
-RunningAverage* usHighRA = new RunningAverage(US_BUFFER_SIZE);
-RunningAverage* usHighRAError = new RunningAverage(US_BUFFER_SIZE);
-*/
+
+
 void testingCode(){
   Serial.println("Testing starting.");
   setupSensors();
   setupSimpleOutputs();
   setupDCMotor();
   setupSensorLogic();
+  updateLights();
   
+  if (tcs.begin()) {
+    Serial.println("Found sensor");
+  } else {
+    Serial.println("No TCS34725 found ... check your connections");
+    while (1); // halt!
+  }
   
-  
-  pinMode(lowEchoPin, INPUT);
-  pinMode(highEchoPin, INPUT);
-  pinMode(trigPin, OUTPUT);
-  attachInterrupt(digitalPinToInterrupt(lowEchoPin), lowEcho, FALLING);
-  attachInterrupt(digitalPinToInterrupt(highEchoPin), highEcho, FALLING);
-  
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(5);
-  digitalWrite(trigPin, LOW);
-  pulseStartTime = micros();
-  while (true){
-    updateMotors();
-    updateSensors();
-    updateSensorLogic();
-    updateLights();
-    Serial.println("====");
-    Serial.println(getUsHigh());
-    Serial.println(getUsLow());
-    /*
-    if (!turningToWeight()){
-      Serial.println(".");
-      if (weightAtLeft()){
-        turnToWeightAtLeft();
-      } else if (weightAtRight()){
-        turnToWeightAtRight();
-      }else if (weightAtMid()){
-      Serial.println("===");
-      leftMotor(40, -1);
-      rightMotor(50, -1);
-      }
+  for (int i=0; i<256; i++) {
+    float x = i;
+    x /= 255;
+    x = pow(x, 2.5);
+    x *= 255;
+      
+    if (commonAnode) {
+      gammatable[i] = 255 - x;
+    } else {
+      gammatable[i] = x;      
     }
-   */ 
+    //Serial.println(gammatable[i]);
+  }
+  
+  
+  while (true){
+    delay(1000);
+    uint16_t clear, red, green, blue;
+    tcs.setInterrupt(false);      // turn on LED
+
+    delay(60);  // takes 50ms to read 
+    
+    tcs.getRawData(&red, &green, &blue, &clear);
+  
+    tcs.setInterrupt(true);  // turn off LED
+    Serial.println("Red: " + String(red));
+    Serial.println("Blue: " + String(blue));
+    Serial.println("Green: " + String(green));
   }
 }
-
-
 
 void testUsSensorsDetect(){
   while(true){
     //delay(500);
-    updateUS();
     boolean weight = false;
     if (getUsLow() == -1 && getUsHigh() > 100){
       weight = true;
@@ -121,7 +107,6 @@ void testInterrupt(){
 
 void testTurnToWeight(){
   while(true){
-    updateUS();
     updateSensors();
     updateMotors();
     if (turningToWeight()){

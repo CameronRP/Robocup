@@ -6,9 +6,9 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-int lowEchoPin = 20;
-int highEchoPin = 21;
-int trigPin = 25;
+int lowEchoPin = 0;  //20
+int highEchoPin = 0;  //21
+int trigPin = 0;  //25
 
 
 
@@ -66,6 +66,7 @@ boolean floorSwitch = false;
 boolean isFloor(void) { return floorSwitch; }
 
 //IR Sensors
+/*
 int ir1ReadingSize = 9;
 int ir1RawVals[9] = {453, 326, 245, 205, 160, 125, 105, 85, 65};  //Raw ir values at each distance.
 int ir1DisVals[9] = {100, 150, 200, 250, 300, 400, 500, 600, 800};  //Distance in mm
@@ -89,12 +90,12 @@ int ir5DisVals[9] = {100, 150, 200, 250, 300, 400, 500, 600, 800};  //Distance i
 int ir6ReadingSize = 8;
 int ir6RawVals[8] = {500, 446, 390, 302, 245, 205, 160, 140};  //Raw ir values at each distance.
 int ir6DisVals[8] = {200, 250, 300, 400, 500, 600, 800, 1000};  //Distance in mm
+*/
 
-
-#define SHORT_IR_ERROR_FROM_AVG 40
+//#define SHORT_IR_ERROR_FROM_AVG 40
 
 int ir1 = 0;
-RunningAverage* ir1RA = new RunningAverage(10);
+RunningAverage* ir1RA = new RunningAverage(5);
 int getIR1Raw(void) { return ir1; }
 int getIR1(void) { 
  // if (abs(ir1 - ir1RA->getAverage()) > SHORT_IR_ERROR_FROM_AVG) {
@@ -105,7 +106,7 @@ int getIR1(void) {
 }
 
 int ir2 = 0;
-RunningAverage* ir2RA = new RunningAverage(10);
+RunningAverage* ir2RA = new RunningAverage(5);
 int getIR2Raw(void) { return ir2; }
 int getIR2(void) { 
   //if (abs(ir2 - ir2RA->getAverage()) > SHORT_IR_ERROR_FROM_AVG) {
@@ -116,48 +117,24 @@ int getIR2(void) {
 }
 
 int ir3 = 0;
-RunningAverage* ir3RA = new RunningAverage(10);
+RunningAverage* ir3RA = new RunningAverage(5);
 int getIR3Raw(void) { return ir3; }
-int getIR3(void) { 
-  if (abs(ir3 - ir3RA->getAverage()) > SHORT_IR_ERROR_FROM_AVG) {
-    return -1;
-  } else {
-    return ir3RA->getAverage(); 
-  }
-}
+int getIR3(void) { return ir3RA->getAverage(); }
 
 int ir4 = 0;
-RunningAverage* ir4RA = new RunningAverage(10);
+RunningAverage* ir4RA = new RunningAverage(5);
 int getIR4Raw(void) { return ir4; }
-int getIR4(void) { 
-  //if (abs(ir4 - ir4RA->getAverage()) > SHORT_IR_ERROR_FROM_AVG) {
-  //  return -1;
-  //} else {
-    return ir4RA->getAverage(); 
-  //}
-}
+int getIR4(void) { return ir4RA->getAverage(); }
 
 int ir5 = 0;
-RunningAverage* ir5RA = new RunningAverage(10);
+RunningAverage* ir5RA = new RunningAverage(5);
 int getIR5Raw(void) { return ir5; }
-int getIR5(void) { 
-  //if (abs(ir5 - ir5RA->getAverage()) > SHORT_IR_ERROR_FROM_AVG) {
-  //  return -1;
-  //} else {
-    return ir5RA->getAverage(); 
-  //}
-}
+int getIR5(void) { return ir5RA->getAverage(); }
 
 int ir6 = 0;
-RunningAverage* ir6RA = new RunningAverage(10);
+RunningAverage* ir6RA = new RunningAverage(5);
 int getIR6Raw(void) { return ir6; }
-int getIR6(void) { 
-  if (abs(ir6 - ir6RA->getAverage()) > SHORT_IR_ERROR_FROM_AVG) {
-    return -1;
-  } else {
-    return ir6RA->getAverage(); 
-  }
-}
+int getIR6(void) { return ir6RA->getAverage(); }
 
 //US Sensors
 int usHigh = 0;
@@ -271,7 +248,7 @@ void updateSensors(void) {
   //us6 = analogRead(us6Pin);
   
   
-  if (lowRec && highRec) {
+  if (lowRec && highRec || micros() > pulseStartTime + 18000) {
     digitalWrite(trigPin, LOW);
     delayMicroseconds(2);
     digitalWrite(trigPin, HIGH);
@@ -280,7 +257,7 @@ void updateSensors(void) {
     pulseStartTime = micros();
     lowRec = false;
     highRec = false;
-  }
+  } 
 }
 
 boolean validUsHigh(){
@@ -321,42 +298,7 @@ void highEcho(){
   }
 }
 
-//====================UPDATE US SENSORS====================
-//Updates the US sensors as they are not updates in the main update
-void updateUS(void) {
-  
-  
-  usHigh = msToMM(getUSDuration(usHighEchoPin, usHighTrigPin));
-  delay(2);
-  usLow = msToMM(getUSDuration(usLowEchoPin, usLowTrigPin));
-}
-
 //====================Functions to read US values====================
-
-//Converts the value from a ultrasonic sensor sensor to mm, -1 is returnd if the value is too far away to read.
-int msToMM(long microseconds)
-{
-  return microseconds / 6;
-}
-
-long getUSDuration(int echoPin, int trigPin) {
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(2);
-  digitalWrite(trigPin, LOW);
-  /*
-  pulse();
-  pulse();
-  pulse();
-  pulse();
-  pulse();
-  pulse();
-  pulse();
-  pulse();
-  */
-  return pulseIn(echoPin, HIGH, US_TIMEOUT);
-}
 
 //Used the recorded distances to estimate the distance from the raw IR reading.
 //For each IR sensor there is a RawArray, DisArray and readingsSize.
@@ -378,19 +320,6 @@ int calculateIrInMM(int rawVal, int readingsSize, int* rawArray, int* disArray){
   }
   return -1;
 }
-
-/*
-void pulseUsSensors(void) {
-  digitalWrite(usLeftTrigPin, LOW);
-  digitalWrite(usRightTrigPin, LOW);
-  delayMicroseconds(2);
-  digitalWrite(usLeftTrigPin, HIGH);
-  digitalWrite(usRightTrigPin, HIGH);
-  delayMicroseconds(5);
-  digitalWrite(usLeftTrigPin, LOW);
-  digitalWrite(usRightTrigPin, LOW);
-}
-*/
 
 // Returns the US reading
 // Error -1 is 3 values, 1st greater than 700,

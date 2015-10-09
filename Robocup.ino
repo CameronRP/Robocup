@@ -92,13 +92,17 @@ void initialHindering(void){
 
 }
 
-
+void updateAll(){
+  updateSensors();
+  updateSensorLogic();
+  updateLights();
+  updateMotors();
+}
 
 
 void wallFollow(){
   
  
-  updateUS();   
   if(getUsHigh() < 320 && getUsLow() < 320 && getUsHigh() > 20 && getUsLow() > 20) {
     getOutOfHere();
   } else 

@@ -18,6 +18,28 @@ RunningAverage* leftWeight = new RunningAverage(WEIGHT_BUFFER_SIZE);
 RunningAverage* rightWeight = new RunningAverage(WEIGHT_BUFFER_SIZE);
 RunningAverage* midWeight = new RunningAverage(WEIGHT_BUFFER_SIZE);
 
+//==========Wall booleans========================
+boolean wallAtLeft = false;
+boolean wallAtRight = false;
+boolean wallAtMid = false;
+boolean wallAtLeftAngle = false;
+boolean wallAtRightAngle = false;
+boolean wallCloseLeft = false;
+boolean wallCloseRight = false;
+boolean wallCloseMid = false;
+boolean wallCloseLeftAngle = false;
+boolean wallCloseRightAngle = false;
+//===============================================
+
+//=================EDGE DETECT VARIABLES====================
+long incEdgeDetectLeftTime = 0;
+long incEdgeDetectRightTime = 0;
+long decEdgeDetectLeftTime = 0;
+long decEdgeDetectRightTime = 0;
+boolean doubleEdgeAtLeft = false;
+boolean doubleEdgeAtRight = false;
+//=========================================================
+
 void setupSensorLogic(){
   leftWeight->clear();
   rightWeight->clear();
@@ -61,7 +83,7 @@ void updateSensorLogic(){
     leftWeight->addValue(0);
   }
   
-  //=========Right side weight detect
+  //=========RIGHT SIDE WEIGHT DETECT=================================
   boolean rweight = false;
   if (getIR4() > 100){
     int percentDiff = (getIR4()-getIR5())*100/getIR4();
@@ -74,8 +96,9 @@ void updateSensorLogic(){
   } else {
     rightWeight->addValue(0);
   }
+  //================END RIGHT SIDE WEIGHT DETECT=========
 
-  //=============Mid weight detect
+  //=============MID WEIGHT DETECT========================================
   boolean mweight = false;
   if (getUsLow() == -1 && getUsHigh() > 100){
     mweight = true;
@@ -88,11 +111,79 @@ void updateSensorLogic(){
   } else {
     midWeight->addValue(0);
   }
+  //===================END MID WEIGHT DETECT=============
+  
+  //============WALL DETECT================================================
+  wallAtLeft = (getIR1() > 320);
+  wallAtRight = (getIR5() > 330);
+  wallAtMid = (getUsHigh() < 60);
+  wallAtLeftAngle = (getIR3() > 410);
+  wallAtRightAngle = (getIR6() > 420);
+  wallCloseLeft = (getIR1() > 240);
+  wallCloseRight = (getIR5() > 250);
+  wallCloseMid = (getUsHigh() < 200);
+  wallCloseLeftAngle = (getIR3() > 360);
+  wallCloseRightAngle = (getIR6() > 380);
+  //============END WALL DETECT==============================
+  
+  //=============EDGE DETECT=================================================
+  doubleEdgeAtRight = false;
+  if (getIR6Raw() > 150 && getIR6Raw() > getIR6() + 50){
+    incEdgeDetectRightTime = millis();
+    //Serial.println("edge detect right inc");
+  }
+  if (getIR6Raw() > 150 && getIR6Raw() < getIR6() - 50){
+    doubleEdgeAtRight = (millis() - incEdgeDetectRightTime < 500);
+  }
+  doubleEdgeAtLeft = false;
+  if (getIR3Raw() > 150 && getIR3Raw() > getIR3() + 50){
+    incEdgeDetectLeftTime = millis();
+  }
+  if (getIR3Raw() > 150 && getIR3Raw() < getIR3() - 50){
+    doubleEdgeAtLeft = (millis() - incEdgeDetectLeftTime < 500);
+  }
+  //============EDGE DETECT END============================================== 
+ 
 }
 
+//=====================================================Wall close function=========================================
+boolean isWallAtRight(){ return wallAtRight; }
+
+boolean isWallAtLeft(){ return wallAtLeft; }
+
+boolean isWallAtMid(){ return wallAtMid; }
+
+boolean isWallAtLeftAngle(){ return wallAtLeftAngle; }
+
+boolean isWallAtRightAngle(){ return wallAtRightAngle; }
+
+boolean isWallCloseRight(){ return wallCloseRight; }
+
+boolean isWallCloseLeft(){ return wallCloseLeft; }
+
+boolean isWallCloseMid(){ return wallCloseMid; }
+
+boolean isWallCloseLeftAngle(){ return wallCloseLeftAngle; }
+
+boolean isWallCloseRightAngle(){ return wallCloseRightAngle; }
+
+boolean isWallInFront(){
+  return (wallAtRight || wallAtLeft || wallAtMid || wallAtLeftAngle || wallAtRightAngle);
+}
+
+boolean isWallClose(){
+  return (wallCloseRight || wallCloseLeft || wallCloseMid || wallCloseLeftAngle || wallCloseRightAngle);
+}
+//==============================================================================================================
+
+//==================EDGE DETECT FUNCTIONS============================================
+boolean isDoubleEdgeAtRight() { return doubleEdgeAtRight; }
+
+boolean isDoubleEdgeAtLeft() { return doubleEdgeAtLeft; }
+//==================EDGE DETECT FUNCTION END=======================================
 
 
-
+//=============================WEIGHT DETECT FUNCTIONS==============================
 boolean weightAtLeft(void){
   if (leftWeight->getAverage() >= 12){
     return true;
@@ -116,3 +207,4 @@ boolean weightAtMid(void){
     return false;
   }
 }
+//============================WEIGHT DETECT FUNCTIONS END===============================
