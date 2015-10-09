@@ -1,10 +1,34 @@
 //This will look at the sensors and do some logic stuff
 
+#define ON_GREEN_R 128
+#define ON_GREEN_B 58
+#define ON_GREEN_G 110
+#define ON_GREEN_C 301
+
+#define ON_BLACK_R 109
+#define ON_BLACK_B 47
+#define ON_BLACK_G 82
+#define ON_BLACK_C 226
+
+#define ON_BLUE_R 132
+#define ON_BLUE_B 106
+#define ON_BLUE_G 125
+#define ON_BLUE_C 367
+
 //=================VARIABLES=========================
+
+
+#define COLOUR_BUFFER_SIZE 5
+RunningAverage* onBlueRA = new RunningAverage(COLOUR_BUFFER_SIZE);
+RunningAverage* onBlackRA = new RunningAverage(COLOUR_BUFFER_SIZE);
+RunningAverage* onGreenRA = new RunningAverage(COLOUR_BUFFER_SIZE);
 
 
 
 //======================FUNCTIONS======================
+boolean onGreen(void) { return (onGreenRA->getAverage() == COLOUR_BUFFER_SIZE); }
+boolean onBlue(void) { return (onBlueRA->getAverage() == COLOUR_BUFFER_SIZE); }
+boolean onBlack(void) { return (onBlackRA->getAverage() == COLOUR_BUFFER_SIZE); }
 
 
 
@@ -38,7 +62,9 @@ long decEdgeDetectLeftTime = 0;
 long decEdgeDetectRightTime = 0;
 boolean doubleEdgeAtLeft = false;
 boolean doubleEdgeAtRight = false;
-//=========================================================
+//================================================
+
+//=========================================
 
 void setupSensorLogic(){
   leftWeight->clear();
@@ -47,6 +73,41 @@ void setupSensorLogic(){
 }
 
 void updateSensorLogic(){
+
+  //calculating on green
+  int error = 10;
+  //Serial.println("seeing what colout im on");
+  //Serial.println("R: " + String(getRedVal()));
+  //Serial.println("G: " + String(getGreenVal()));
+  //Serial.println("B: " + String(getBlueVal()));
+  //Serial.println("C: " + String(getClearVal()));
+
+  int greenError = abs(getRedVal() - ON_GREEN_R) + abs(getGreenVal() - ON_GREEN_G) + abs(getBlueVal() - ON_GREEN_B) + abs(getClearVal() - ON_GREEN_C);
+  int blackError = abs(getRedVal() - ON_BLACK_R) + abs(getGreenVal() - ON_BLACK_G) + abs(getBlueVal() - ON_BLACK_B) + abs(getClearVal() - ON_BLACK_C);
+  int blueError = abs(getRedVal() - ON_GREEN_R) + abs(getGreenVal() - ON_BLUE_G) + abs(getBlueVal() - ON_BLUE_B) + abs(getClearVal() - ON_BLUE_C);
+  if (greenError < blackError){
+    if (greenError < blueError) {
+      onGreenRA->addValue(COLOUR_BUFFER_SIZE);
+      onBlackRA->addValue(0);
+      onBlueRA->addValue(0);
+    }
+    else {
+      onGreenRA->addValue(0);
+      onBlackRA->addValue(0);
+      onBlueRA->addValue(COLOUR_BUFFER_SIZE);
+    }
+  } else {
+    if (blackError < blueError) {
+      onGreenRA->addValue(0);
+      onBlackRA->addValue(COLOUR_BUFFER_SIZE);
+      onBlueRA->addValue(0);
+    }
+    else {
+      onGreenRA->addValue(0);
+      onBlackRA->addValue(0);
+      onBlueRA->addValue(COLOUR_BUFFER_SIZE);
+    }
+  }
   
   boolean lweight = false;
   

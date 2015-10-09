@@ -26,6 +26,12 @@ RunningAverage* usHighRA = new RunningAverage(US_BUFFER_SIZE);
 RunningAverage* usHighRAError = new RunningAverage(US_BUFFER_SIZE);
 
 
+Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_50MS, TCS34725_GAIN_4X);
+uint16_t clear, red, green, blue;
+int getClearVal() { return (int) clear; }
+int getRedVal() { return (int) red; }
+int getGreenVal() { return (int) green; }
+int getBlueVal() { return (int) blue; }
 
 
 
@@ -64,35 +70,6 @@ boolean rightFrontSwitch = false;
 boolean isRightFront(void) { return rightFrontSwitch; }
 boolean floorSwitch = false;
 boolean isFloor(void) { return floorSwitch; }
-
-//IR Sensors
-/*
-int ir1ReadingSize = 9;
-int ir1RawVals[9] = {453, 326, 245, 205, 160, 125, 105, 85, 65};  //Raw ir values at each distance.
-int ir1DisVals[9] = {100, 150, 200, 250, 300, 400, 500, 600, 800};  //Distance in mm
-
-int ir2ReadingSize = 8;
-int ir2RawVals[9] = {475, 340, 263, 230, 190, 139, 100, 80, 45};  //Raw ir values at each distance.
-int ir2DisVals[9] = {100, 150, 200, 250, 300, 400, 500, 600, 800};  //Distance in mm
-
-int ir3ReadingSize = 8;
-int ir3RawVals[7] = {539, 500, 395, 306, 255, 190, 150};  //Raw ir values at each distance.
-int ir3DisVals[7] = {250, 300, 400, 500, 600, 800, 1000};  //Distance in mm
-
-int ir4ReadingSize = 8;
-int ir4RawVals[9] = {467, 338, 279, 220, 195, 151, 110, 85, 35};  //Raw ir values at each distance.
-int ir4DisVals[9] = {100, 150, 200, 250, 300, 400, 500, 600, 800};  //Distance in mm
-
-int ir5ReadingSize = 9;
-int ir5RawVals[9] = {448, 328, 238, 185, 155, 119, 99, 85, 60};  //Raw ir values at each distance.
-int ir5DisVals[9] = {100, 150, 200, 250, 300, 400, 500, 600, 800};  //Distance in mm
-
-int ir6ReadingSize = 8;
-int ir6RawVals[8] = {500, 446, 390, 302, 245, 205, 160, 140};  //Raw ir values at each distance.
-int ir6DisVals[8] = {200, 250, 300, 400, 500, 600, 800, 1000};  //Distance in mm
-*/
-
-//#define SHORT_IR_ERROR_FROM_AVG 40
 
 int ir1 = 0;
 RunningAverage* ir1RA = new RunningAverage(5);
@@ -160,9 +137,16 @@ long usRightDuration = 0;
 
 
 //========================SETUP SENSORS INPUTS===================================
+int colourSensorCounter = 0;
 void setupSensors(void) {
   Serial.println("Setting up sensors");
-  
+
+  if (tcs.begin()){
+    Serial.println("Colour sensor found.");  
+  } else {
+    Serial.println("Colour sensor not found");
+    while(1);  
+  }
   pinMode(lowEchoPin, INPUT);
   pinMode(highEchoPin, INPUT);
   pinMode(trigPin, OUTPUT);
@@ -215,6 +199,19 @@ void setupSensors(void) {
 //Updates the IR and Switches, not the US sensors
 //No buffer used at the moment
 void updateSensors(void) {
+  
+  colourSensorCounter++;
+  if (colourSensorCounter >= 1){
+    colourSensorCounter = 20;
+    tcs.setInterrupt(false);      // turn on LED
+
+    delay(60);  // takes 50ms to read 
+    
+    tcs.getRawData(&red, &green, &blue, &clear);
+  
+    tcs.setInterrupt(true);  // turn off LED
+  }
+  
   //Updating Switches
   limitSwitch = digitalRead(limitSwitchPin);
   conductionSwitch = digitalRead(conductionSwitchPin);

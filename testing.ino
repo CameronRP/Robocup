@@ -4,7 +4,7 @@
 byte gammatable[256];
 
 
-Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_50MS, TCS34725_GAIN_4X);
+//Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_50MS, TCS34725_GAIN_4X);
 
 #define commonAnode true
 
@@ -25,34 +25,13 @@ void testingCode(){
     while (1); // halt!
   }
   
-  for (int i=0; i<256; i++) {
-    float x = i;
-    x /= 255;
-    x = pow(x, 2.5);
-    x *= 255;
-      
-    if (commonAnode) {
-      gammatable[i] = 255 - x;
-    } else {
-      gammatable[i] = x;      
-    }
-    //Serial.println(gammatable[i]);
-  }
-  
   
   while (true){
-    delay(1000);
-    uint16_t clear, red, green, blue;
-    tcs.setInterrupt(false);      // turn on LED
-
-    delay(60);  // takes 50ms to read 
+    updateAll();
+    if (onBlue()) Serial.println("Blue");
+    if (onBlack()) Serial.println("Black");
+    if (onGreen()) Serial.println("Green");
     
-    tcs.getRawData(&red, &green, &blue, &clear);
-  
-    tcs.setInterrupt(true);  // turn off LED
-    Serial.println("Red: " + String(red));
-    Serial.println("Blue: " + String(blue));
-    Serial.println("Green: " + String(green));
   }
 }
 
