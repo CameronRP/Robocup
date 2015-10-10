@@ -45,7 +45,7 @@ void setupDCMotor(void) {
 
 
 
-void updateMotors(){
+void updateMotors(void){
   
   long time = millis();
   
@@ -61,6 +61,7 @@ void updateMotors(){
   //Update left motor
   if (leftMotorGoalPower != leftMotorActualPower || (time >= leftMotorStopTime && leftMotorMovingFixTime)){
     //Left motor value needs to be updated
+    
     if (serial) {
       Serial.print("Updating L motor to value of: ");
       Serial.println(leftMotorGoalPower);
@@ -69,8 +70,8 @@ void updateMotors(){
       leftMotorGoalPower = 0;
       leftMotorMovingFixTime = false;
     } 
-    setLeftMotor(leftMotorGoalPower);
-    leftMotorActualPower = leftMotorGoalPower;
+    leftMotorActualPower = setLeftMotor(leftMotorGoalPower);
+//    leftMotorActualPower = leftMotorGoalPower;
   }
   
   //Update right motor
@@ -83,8 +84,7 @@ void updateMotors(){
       rightMotorGoalPower = 0;
       rightMotorMovingFixTime = false;
     }
-    setRightMotor(rightMotorGoalPower);
-    rightMotorActualPower = rightMotorGoalPower;
+    rightMotorActualPower = setRightMotor(rightMotorGoalPower);
     
   }
 }
@@ -92,15 +92,15 @@ void updateMotors(){
 
 void turnToWeightAtLeft(void){
   int duration = getIR2()*2+50;
-  leftMotor(-40, 200);
-  rightMotor(60, 200);
+  leftMotor(-60, 200);
+  rightMotor(50, 200);
   turningToWeightAtRightStopTime = millis() + 200;
 }
 
 void turnToWeightAtRight(void){
   int duration = getIR4()*2+50;
-  leftMotor(60, 200);
-  rightMotor(-40, 200);
+  leftMotor(50, 200);
+  rightMotor(-60, 200);
   turningToWeightAtLeftStopTime = millis() + 200;
 }
 
@@ -186,7 +186,7 @@ boolean isRightMotorMovingFixTime(void){
 
 // Sets the speed of the left motor. +ve forward, -ve backward. Range is from -60 to 50.
 // If value outside this range given, then it will default to nearest limit.
-void setLeftMotor(int value) {
+int setLeftMotor(int value) {
   if (serial) {
     Serial.print("Setting L motor to value of: ");
     Serial.println(value);
@@ -198,11 +198,12 @@ void setLeftMotor(int value) {
     value = -60;
   }
   leftMotorServo.write(value + 90);
+  return value;
 }
 
 // Sets the speed of the right motor. +ve forward, -ve backward. Range is from -60 to 50.
 // If value outside this range given, then it will default to nearest limit.
-void setRightMotor(int value) {
+int setRightMotor(int value) {
   if (serial) {
     Serial.print("Setting R motor to value of: ");
     Serial.println(value);
@@ -214,6 +215,7 @@ void setRightMotor(int value) {
     value = -60;
   }
   rightMotorServo.write(value + 90);
+  return value;
 }
 
 void setBothMotor(int value) {
