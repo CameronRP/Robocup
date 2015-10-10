@@ -30,6 +30,13 @@ boolean turningToWeight(void) {
   return (turningToWeightAtLeft || turningToWeightAtRight);
 }
 
+//===================MOVING STATE=================
+enum MovingState { TURN_TO_WEIGHT_AT_LEFT, TURN_TO_WEIGHT_AT_RIGHT, MOVING_TO_WEIGHT_IN_FRONT, NOT_MOVING, MOVING_TO_WEIGHT_AT_RIGHT_EDGE, MOVING_TO_WEIGHT_AT_LEFT_EDGE };
+MovingState movingState = NOT_MOVING;
+MovingState previousMovingState = NOT_MOVING;
+
+
+
 
 
 Servo leftMotorServo;
@@ -40,9 +47,12 @@ void setupDCMotor(void) {
   leftMotorServo.attach(left_motor);
   rightMotorServo.attach(right_motor);
   setBothMotor(0);
-     
 }
 
+void updateMovingState(int s){
+  previousMovingState = movingState;
+  movingState = (MovingState) s;  
+}
 
 
 void updateMotors(void){
@@ -89,21 +99,50 @@ void updateMotors(void){
   }
 }
 
-
+//=============================SET MOVEMENT FUNCTION===================
 void turnToWeightAtLeft(void){
-  int duration = getIR2()*2+50;
-  leftMotor(-60, 200);
-  rightMotor(50, 200);
-  turningToWeightAtRightStopTime = millis() + 200;
+  updateMovingState((int) TURN_TO_WEIGHT_AT_LEFT);
+  int duration = 100;
+  leftMotor(-30, duration);
+  rightMotor(50, duration);
+  turningToWeightAtRightStopTime = millis() + duration;
 }
 
 void turnToWeightAtRight(void){
-  int duration = getIR4()*2+50;
-  leftMotor(50, 200);
-  rightMotor(-60, 200);
-  turningToWeightAtLeftStopTime = millis() + 200;
+  updateMovingState((int) TURN_TO_WEIGHT_AT_RIGHT);
+  int duration = 100;
+  leftMotor(50, duration);
+  rightMotor(-30, duration);
+  turningToWeightAtLeftStopTime = millis() + duration;
 }
 
+void moveToWeightInFront(void){
+  updateMovingState((int) MOVING_TO_WEIGHT_IN_FRONT);
+  leftMotor(40, -1);
+  rightMotor(40, -1);
+}
+
+void moveToWeightAtLeftEdge(void){
+  updateMovingState((int) MOVING_TO_WEIGHT_AT_LEFT_EDGE);
+  int duration = 1000;
+  leftMotor(-30, duration);
+  rightMotor(50, duration);  
+}
+
+void moveToWeightAtRightEdge(void){
+  updateMovingState((int) MOVING_TO_WEIGHT_AT_RIGHT_EDGE);
+  int duration = 1000;
+  leftMotor(50, duration);
+  rightMotor(-30, duration);  
+}
+
+void stopMoving(void){
+  updateMovingState((int) NOT_MOVING);
+  leftMotor(0, -1);
+  rightMotor(0, -1);  
+  
+}
+//====================================================================
 
 void leftMotor(int power, long duration){
   if (duration == -1){

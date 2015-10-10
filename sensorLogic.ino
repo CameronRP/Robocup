@@ -8,14 +8,40 @@
 #define ON_BLACK_R 109
 #define ON_BLACK_B 47
 #define ON_BLACK_G 82
-#define ON_BLACK_C 226
+#define ON_BLACK_C 2x
 
 #define ON_BLUE_R 132
 #define ON_BLUE_B 106
 #define ON_BLUE_G 125
 #define ON_BLUE_C 367
 
+
+
+
 //=================VARIABLES=========================
+
+
+enum Position {CORNER, WALL_LEFT_SIDE, WALL_RIGHT_SIDE, WALL_IN_FRONT, WALL_AT_LEFT, WALL_AT_RIGHT, NO_WALL};
+Position position = NO_WALL;
+
+void updatePositionState(){
+  if (isWallCloseLeftAngle() && isWallCloseRightAngle()) {
+    position = CORNER;  
+  } else if (isWallCloseLeft() && isWallCloseRight() || isWallCloseMid()){
+    position = WALL_IN_FRONT;
+  } else if (isWallCloseLeft()){
+    position = WALL_AT_LEFT;
+  } else if (isWallCloseRight()){
+    position = WALL_AT_RIGHT;
+  } else if (isWallCloseLeftAngle()) {
+    position = WALL_LEFT_SIDE;
+  } else if (isWallCloseRightAngle()){
+    position = WALL_RIGHT_SIDE;
+  } 
+  else {
+    position = NO_WALL;
+  };
+}
 
 
 #define COLOUR_BUFFER_SIZE 5
@@ -73,15 +99,7 @@ void setupSensorLogic(){
 }
 
 void updateSensorLogic(){
-
-  //calculating on green
-  int error = 10;
-  //Serial.println("seeing what colout im on");
-  //Serial.println("R: " + String(getRedVal()));
-  //Serial.println("G: " + String(getGreenVal()));
-  //Serial.println("B: " + String(getBlueVal()));
-  //Serial.println("C: " + String(getClearVal()));
-
+  
   int greenError = abs(getRedVal() - ON_GREEN_R) + abs(getGreenVal() - ON_GREEN_G) + abs(getBlueVal() - ON_GREEN_B) + abs(getClearVal() - ON_GREEN_C);
   int blackError = abs(getRedVal() - ON_BLACK_R) + abs(getGreenVal() - ON_BLACK_G) + abs(getBlueVal() - ON_BLACK_B) + abs(getClearVal() - ON_BLACK_C);
   int blueError = abs(getRedVal() - ON_GREEN_R) + abs(getGreenVal() - ON_BLUE_G) + abs(getBlueVal() - ON_BLUE_B) + abs(getClearVal() - ON_BLUE_C);
@@ -108,7 +126,8 @@ void updateSensorLogic(){
       onBlueRA->addValue(COLOUR_BUFFER_SIZE);
     }
   }
-  
+
+  //======================LEFT SIDE WEIGHT DETECT====================
   boolean lweight = false;
   
   if (getIR2() > 250){
@@ -143,6 +162,7 @@ void updateSensorLogic(){
   } else {
     leftWeight->addValue(0);
   }
+  //=================================================
   
   //=========RIGHT SIDE WEIGHT DETECT=================================
   boolean rweight = false;
@@ -204,7 +224,7 @@ void updateSensorLogic(){
     doubleEdgeAtLeft = (millis() - incEdgeDetectLeftTime < 500);
   }
   //============EDGE DETECT END============================================== 
- 
+  updatePositionState();
 }
 
 //=====================================================Wall close function=========================================

@@ -23,6 +23,8 @@ enum State {SEARCHING, DETECTED, JUST_LOST_SIGHT_OF_FOOD, PICK_UP_FOOD};
 State state = SEARCHING;  //state to start in.
 
 
+
+
 void setup(){
   
   setupSensors();
