@@ -23,10 +23,10 @@ enum State {SEARCHING, DETECTED, JUST_LOST_SIGHT_OF_FOOD, PICK_UP_FOOD};
 State state = SEARCHING;  //state to start in.
 
 
-
+long randNumber;
 
 void setup(){
-  
+  randomSeed(analogRead(0));
   setupSensors();
   setupSimpleOutputs();
   setupDCMotor();
@@ -35,10 +35,11 @@ void setup(){
   if (serial) { Serial.begin(9600); }
   if (testing) { testingCode(); }
   
-  bothMotors(0, -1);
+  //bothMotors(0, -1);
 }
 
 void loop(){
+  /*
   updateSensors();
   //pulseUsSensors();
   updateMotors();
@@ -75,6 +76,7 @@ void loop(){
     Serial.println("some info to print");
     Serial.println("Some other info to print");
   }
+  */
 }
 
 void errorFunction(String message){
@@ -82,6 +84,8 @@ void errorFunction(String message){
   Serial.println("Just some text in here in case the message isn't coming through properly");
   if (!serial) {Serial.begin(9600); }
   while (true) {
+    updateAll();
+    stopMoving();
     Serial.println(message);
     setLedWarning(true);
     delay(300);
@@ -90,11 +94,6 @@ void errorFunction(String message){
   }
 }
 
-//Initial Hindering
-//Drives to opponents HQ and places box,
-void initialHindering(void){
-
-}
 
 void updateAll(){
   updateSensors();
@@ -103,7 +102,14 @@ void updateAll(){
   updateMotors();
 }
 
+void setupAll(){
+  setupSensors();
+  setupSimpleOutputs();
+  setupDCMotor();
+  setupSensorLogic();
+}
 
+/*
 void wallFollow(){
   
  
@@ -235,12 +241,14 @@ void wallFollowing(void){
 */
 //======================================================================================
 //Move somewhere less searched
+/*
 void findNewSearchSpot(void){
 
 }
 
 //=======================================================================================
 //Food is detected
+/*
 void detected(void){
   bothMotors(0, -1);
   digitalWrite(26, HIGH);
@@ -248,9 +256,10 @@ void detected(void){
   digitalWrite(28, HIGH);
   digitalWrite(25 + weightLocation, LOW);
 }
-
+*/
 //======================================================================================
 //Just lost sight of food
+/*
 void justLostSightOfFood(void){
   //TODO
 }

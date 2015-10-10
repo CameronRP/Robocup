@@ -13,6 +13,7 @@ void setupSimpleOutputs(void){
   pinMode(led1, OUTPUT);
   pinMode(led2, OUTPUT);
   pinMode(led3, OUTPUT);
+   
 }
 
 
@@ -21,7 +22,16 @@ void setLedWarning(boolean b){
 }
 
 void updateLights(void) {
-  digitalWrite(led1, weightAtLeft() && isDoubleEdgeAtRight());
+  /*
+  digitalWrite(led1, weightAtLeft());
   digitalWrite(led2, weightAtMid());
-  digitalWrite(led3, weightAtRight() && isDoubleEdgeAtLeft());
+  digitalWrite(led3, weightAtRight());
+  */
+  
+  /*
+  digitalWrite(led1, digitalRead(36));
+  digitalWrite(led2, digitalRead(37));
+  digitalWrite(led3, digitalRead(35));
+  digitalWrite(ledWarningPin, HIGH);
+  */
 }

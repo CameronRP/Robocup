@@ -26,10 +26,11 @@ RunningAverage* gyroXRA = new RunningAverage(GYRO_BUFFER_SIZE);
 RunningAverage* gyroYRA = new RunningAverage(GYRO_BUFFER_SIZE);
 RunningAverage* gyroZRA = new RunningAverage(GYRO_BUFFER_SIZE);
 
-int lowEchoPin = 18;  //20
-int highEchoPin = 19;  //21
-int lowTrigPin = 17;  //25
-int highTrigPin = 16;
+const int lowEchoPin = 18;  //20
+const int highEchoPin = 19;  //21
+const int lowTrigPin = 17;  //25
+const int highTrigPin = 16;
+
 
 
 volatile long pulseStartTime = 0;
@@ -58,10 +59,10 @@ int getBlueVal() { return (int) blue; }
 //====================Pins====================
 //Switches Pins
 const int limitSwitchPin = A5;
-const int conductionSwitchPin = A2;
-const int leftFrontSwitchPin = A3;
-const int rightFrontSwitchPin = A4;
-const int floorSwitchPin = A6;
+const int touchLPin = 36;
+const int touchRPin = 35;
+const int conductionSensorPin = 37;
+// const int digitalIRWeightDetectPin = NEED A PIN FOR THIS BAD BOY!
 
 //IR sensors Pins
 const int ir1Pin = A2;  //Left Upper
@@ -88,8 +89,8 @@ boolean leftFrontSwitch = false;
 boolean isLeftFront(void) { return leftFrontSwitch; }
 boolean rightFrontSwitch = false;
 boolean isRightFront(void) { return rightFrontSwitch; }
-boolean floorSwitch = false;
-boolean isFloor(void) { return floorSwitch; }
+boolean digitalIRWeightDetect = false;
+boolean isWeightAttached(void) { return digitalIRWeightDetect; }
 
 int ir1 = 0;
 RunningAverage* ir1RA = new RunningAverage(5);
@@ -197,11 +198,12 @@ void setupSensors(void) {
   
   
   //Switches
-  pinMode(limitSwitchPin, INPUT);
-  pinMode(conductionSwitchPin, INPUT);
-  pinMode(leftFrontSwitchPin, INPUT);
-  pinMode(rightFrontSwitchPin, INPUT);
-  pinMode(floorSwitchPin, INPUT);
+  pinMode(limitSwitchPin, INPUT); // NOT DONE YET!!
+  pinMode(touchLPin, INPUT);
+  pinMode(touchRPin, INPUT);
+  pinMode(conductionSensorPin, INPUT);
+//  pinMode(digitaIRWeightDetectPin, INPUT); // NEITHER IS THIS ONE!!!
+
 
   //IR sensors
   pinMode(ir1Pin, INPUT);
@@ -236,10 +238,10 @@ void updateSensors(void) {
   
   //======================================Updating Switches============================
   limitSwitch = digitalRead(limitSwitchPin);
-  conductionSwitch = digitalRead(conductionSwitchPin);
-  leftFrontSwitch = digitalRead(leftFrontSwitchPin);
-  rightFrontSwitch = digitalRead(rightFrontSwitchPin);
-  floorSwitch = digitalRead(floorSwitchPin);
+  conductionSwitch = digitalRead(conductionSensorPin);
+  leftFrontSwitch = digitalRead(touchLPin);
+  rightFrontSwitch = digitalRead(touchRPin);
+  //digitalIRWeightDetect = digitalRead(digitalIRWeightDetectPin);
   //=======================================================
 
   //=====================Updating IR Sensors==================

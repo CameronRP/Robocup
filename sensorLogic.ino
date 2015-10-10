@@ -8,7 +8,7 @@
 #define ON_BLACK_R 109
 #define ON_BLACK_B 47
 #define ON_BLACK_G 82
-#define ON_BLACK_C 2x
+#define ON_BLACK_C 226
 
 #define ON_BLUE_R 132
 #define ON_BLUE_B 106
