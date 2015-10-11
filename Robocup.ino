@@ -10,8 +10,9 @@
 //To test code, set testing to true. This will run the testingCode() function in testing.ino. Go to testing.ino for more info.
 //You will probably also want serial set to true.
 //===================================================================
-boolean testing = true;
+boolean testing = false;
 boolean serial = true;
+boolean testingServos = true;
 
 
 int weightLocation = 0;
@@ -27,13 +28,14 @@ long randNumber;
 
 void setup(){
   randomSeed(analogRead(0));
-  setupSensors();
-  setupSimpleOutputs();
-  setupDCMotor();
-  setupSensorLogic();
+  //setupSensors();
+  //setupSimpleOutputs();
+  //setupDCMotor();
+  //setupSensorLogic();
   
   if (serial) { Serial.begin(9600); }
   if (testing) { testingCode(); }
+  if (testingServos) { testServo(); }
   
   //bothMotors(0, -1);
 }
@@ -80,12 +82,20 @@ void loop(){
 }
 
 void errorFunction(String message){
+  stopRailServo();
+  stopLiftServo();
+  stopTrayServo();
+  setLeftMotor(0);
+  setRightMotor(0);
   Serial.println(message);
   Serial.println("Just some text in here in case the message isn't coming through properly");
   if (!serial) {Serial.begin(9600); }
   while (true) {
     updateAll();
     stopMoving();
+    stopRailServo();
+    stopLiftServo();
+    stopTrayServo();
     Serial.println(message);
     setLedWarning(true);
     delay(300);
@@ -107,6 +117,7 @@ void setupAll(){
   setupSimpleOutputs();
   setupDCMotor();
   setupSensorLogic();
+  setupServo();
 }
 
 /*

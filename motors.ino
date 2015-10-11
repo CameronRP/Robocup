@@ -99,6 +99,27 @@ void updateMotors(void){
 }
 
 //=============================SET MOVEMENT FUNCTION===================
+
+
+void shake (int durMillis) {
+  
+  long stopTime = millis() + durMillis;
+  
+  while(millis() < stopTime) {
+    setLeftMotor(40);
+    setRightMotor(-20);
+    delay(10);
+
+    setLeftMotor(-20);
+    setRightMotor(40);
+    delay(10);
+  }
+  
+  setLeftMotor(0);
+  setRightMotor(0);
+}
+
+
 void turnToWeightAtLeft(void){
   if (serial) Serial.println("Turning to weight at left");
   updateMovingState((int) TURN_TO_WEIGHT_AT_LEFT);
@@ -334,4 +355,6 @@ int setRightMotor(int value) {
   rightMotorServo.write(value + 90);
   return value;
 }
+
+
 

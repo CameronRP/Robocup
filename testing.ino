@@ -10,9 +10,13 @@ void testingCode(){
   //turnToWeightAtRight();
   while(true){
     updateAll();
+<<<<<<< HEAD
     Serial.print(getUsHigh());
     Serial.print("\t");
     Serial.println(getUsLow());
+=======
+    //Serial.println(getAngle());
+>>>>>>> 4ef83e7d42b568ec9df4e94a7c1c1c1aaf08af0a
     //randomMovement();
   }
 }

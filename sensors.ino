@@ -26,10 +26,11 @@ RunningAverage* gyroXRA = new RunningAverage(GYRO_BUFFER_SIZE);
 RunningAverage* gyroYRA = new RunningAverage(GYRO_BUFFER_SIZE);
 RunningAverage* gyroZRA = new RunningAverage(GYRO_BUFFER_SIZE);
 
-const int lowEchoPin = 18;  //20
-const int highEchoPin = 19;  //21
-const int lowTrigPin = 17;  //25
-const int highTrigPin = 16;
+
+const int lowEchoPin = 3;  // Used to be 18
+const int highEchoPin = 2;  // Used to be 19
+const int lowTrigPin = 38;  // Used to be 17
+const int highTrigPin = 39;   // Used to be 16
 
 
 
@@ -58,11 +59,11 @@ int getBlueVal() { return (int) blue; }
 
 //====================Pins====================
 //Switches Pins
-const int limitSwitchPin = A5;
+const int limitSwitchPin = A4;
 const int touchLPin = 36;
 const int touchRPin = 35;
 const int conductionSensorPin = 37;
-// const int digitalIRWeightDetectPin = NEED A PIN FOR THIS BAD BOY!
+const int digitalIRWeightDetectPin = A5;
 
 //IR sensors Pins
 const int ir1Pin = A2;  //Left Upper
@@ -71,12 +72,6 @@ const int ir3Pin = A6;  //Middle Upper
 const int ir4Pin = A11;  //Right Lower
 const int ir5Pin = A10;  //Right Upper
 const int ir6Pin = A7;  //Middle lower
-
-//US snesors Pins
-const int usHighTrigPin = 25;
-const int usHighEchoPin = 21;
-const int usLowTrigPin = 25;
-const int usLowEchoPin = 20;
 
 //====================Output Variables...... AND FUNCTIONS=====================
 //The variables that other modues will use
@@ -90,7 +85,9 @@ boolean isLeftFront(void) { return leftFrontSwitch; }
 boolean rightFrontSwitch = false;
 boolean isRightFront(void) { return rightFrontSwitch; }
 boolean digitalIRWeightDetect = false;
-boolean isWeightAttached(void) { return digitalIRWeightDetect; }
+boolean isDigIR(void) { return digitalIRWeightDetect; }
+
+
 
 int ir1 = 0;
 RunningAverage* ir1RA = new RunningAverage(5);
@@ -156,6 +153,7 @@ void timerIsr()
   uint8_t Buf[14];
   I2Cread(MPU9250_ADDRESS,0x3B,14,Buf);
   r +=((int) (Buf[12]<<8 | Buf[13]) -12);
+  //Serial.println((Buf[12]<<8 | Buf[13]) -9);
 }
 //=============================================
 
@@ -168,17 +166,22 @@ int getAngle(){
 //========================SETUP SENSORS INPUTS===================================
 int colourSensorCounter = 0;
 void setupSensors(void) {
+  if (serial) Serial.println("Before IMU");
+  delay(100);
   setupIMU();
   Timer1.initialize(10000);
   Timer1.attachInterrupt( timerIsr );
   Serial.println("Setting up sensors");
+  delay(100);
   if (tcs.begin()){
     Serial.println("Colour sensor found.");  
   } else {
     Serial.println("Colour sensor not found");
+    delay(100);
     while(1);  
   }
-  
+  if (serial) Serial.println("Before US");
+  delay(1000);
   pinMode(lowEchoPin, INPUT);
   pinMode(highEchoPin, INPUT);
   pinMode(lowTrigPin, OUTPUT);
@@ -297,7 +300,7 @@ void lowEcho(){
     }
     lowRec = true;
   } else {
-    Serial.println("sencodn pulse lower");
+    //Serial.println("sencodn pulse lower");
   }
 }
 
@@ -312,7 +315,7 @@ void highEcho(){
     }
     highRec = true;
   } else {
-    Serial.println("sencodn pulse higher");
+    //Serial.println("sencodn pulse higher");
   }
 }
 
@@ -353,17 +356,24 @@ void I2CwriteByte(uint8_t Address, uint8_t Register, uint8_t Data)
 // Initializations
 void setupIMU()
 {
+    Serial.println("Just in the IMU setup");
+    //delay(1000);
+    
   //pinMode(49, OUTPUT);                 //Pin 49 is used to enable IO power
   //digitalWrite(49, 1);                 //Enable IO power on main CPU board
  
   // Arduino initializations
-  //Wire.begin();                        //Set up I2C buss
+  Wire.begin();                        //Set up I2C buss
   //Serial.begin(9600);                //Set up serial communications
- 
+
   // Configure gyroscope range
   I2CwriteByte(MPU9250_ADDRESS,27,GYRO_FULL_SCALE_2000_DPS);
+  Serial.println("1");
+    delay(1000);
   // Configure accelerometers range
   I2CwriteByte(MPU9250_ADDRESS,28,ACC_FULL_SCALE_16_G);
+  Serial.println("2");
+    delay(1000);
   // Set by pass mode for the magnetometers
   I2CwriteByte(MPU9250_ADDRESS,0x37,0x02);
  
@@ -394,4 +404,5 @@ void updateIMU()
  */ 
 }
 
+//===============================================================================
 
