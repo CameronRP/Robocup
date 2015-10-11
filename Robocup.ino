@@ -10,9 +10,9 @@
 //To test code, set testing to true. This will run the testingCode() function in testing.ino. Go to testing.ino for more info.
 //You will probably also want serial set to true.
 //===================================================================
-boolean testing = false;
+boolean testing = true;
 boolean serial = true;
-boolean testingServos = true;
+boolean testingServos = false;
 
 
 int weightLocation = 0;

@@ -27,8 +27,8 @@ RunningAverage* gyroYRA = new RunningAverage(GYRO_BUFFER_SIZE);
 RunningAverage* gyroZRA = new RunningAverage(GYRO_BUFFER_SIZE);
 
 
-const int lowEchoPin = 3;  // Used to be 18
-const int highEchoPin = 2;  // Used to be 19
+const int lowEchoPin = 2;//2;  // Used to be 18
+const int highEchoPin = 3;//3;  // Used to be 19
 const int lowTrigPin = 38;  // Used to be 17
 const int highTrigPin = 39;   // Used to be 16
 
@@ -147,12 +147,16 @@ long usRightDuration = 0;
 
 //==========================COLOUR INTERRUPT=========================
 volatile long r = 0;
+volatile boolean inInterrupt = false;
 void timerIsr()
 {
+  if (inInterrupt) return;
+  inInterrupt = true;
   sei();
   uint8_t Buf[14];
   I2Cread(MPU9250_ADDRESS,0x3B,14,Buf);
-  r +=((int) (Buf[12]<<8 | Buf[13]) -12);
+  r +=((int) (Buf[12]<<8 | Buf[13]) -10);
+  inInterrupt = false;
   //Serial.println((Buf[12]<<8 | Buf[13]) -9);
 }
 //=============================================
@@ -169,7 +173,7 @@ void setupSensors(void) {
   if (serial) Serial.println("Before IMU");
   delay(100);
   setupIMU();
-  Timer1.initialize(10000);
+  Timer1.initialize(50000);
   Timer1.attachInterrupt( timerIsr );
   Serial.println("Setting up sensors");
   delay(100);
@@ -181,7 +185,7 @@ void setupSensors(void) {
     while(1);  
   }
   if (serial) Serial.println("Before US");
-  delay(1000);
+  //delay(1000);
   pinMode(lowEchoPin, INPUT);
   pinMode(highEchoPin, INPUT);
   pinMode(lowTrigPin, OUTPUT);
@@ -232,10 +236,12 @@ void updateSensors(void) {
   colourSensorCounter++;
   if (colourSensorCounter >= 50){
     colourSensorCounter = 0;
+    inInterrupt = true;
     tcs.setInterrupt(false);      // turn on LED
     delay(60);  // takes 50ms to read 
     tcs.getRawData(&red, &green, &blue, &clear);
     tcs.setInterrupt(true);  // turn off LED
+    inInterrupt = false;
   }
   //==========================================================
   
@@ -263,7 +269,14 @@ void updateSensors(void) {
   //=======================================
   
   //==========================PULSE US SENSORS=============================
+  if (micros() > pulseStartTime + 18000){
+    
+  }
   if (lowRec && highRec || micros() > pulseStartTime + 18000) {
+    if (micros() > pulseStartTime + 18000){
+      usHighRAError->addValue(US_BUFFER_SIZE);
+      usLowRAError->addValue(US_BUFFER_SIZE);
+    }
     digitalWrite(lowTrigPin, LOW);
     digitalWrite(highTrigPin, LOW);
     delayMicroseconds(2);
@@ -288,7 +301,8 @@ boolean validUsLow(){
 }
 
 void lowEcho(){
-  if (!lowRec){
+  //if (!lowRec){
+    if (inInterrupt) return;
     long value = (micros() - pulseStartTime)/6 -80;
     //Serial.println(value);
     if (value < 2000){
@@ -299,13 +313,16 @@ void lowEcho(){
       usLowRAError->addValue(US_BUFFER_SIZE);
     }
     lowRec = true;
-  } else {
+    inInterrupt = false;
+  //} else {
     //Serial.println("sencodn pulse lower");
-  }
+  //}
 }
 
 void highEcho(){
-  if (!highRec){
+  if (inInterrupt) return;
+  inInterrupt = true;
+  //if (!highRec){
     long value = (micros() - pulseStartTime)/6 -80;
     if (value < 2000){
       usHighRA->addValue(value);
@@ -314,9 +331,10 @@ void highEcho(){
       usHighRAError->addValue(US_BUFFER_SIZE);
     }
     highRec = true;
-  } else {
+    inInterrupt = false;
+  //} else {
     //Serial.println("sencodn pulse higher");
-  }
+  //}
 }
 
 

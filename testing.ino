@@ -6,23 +6,18 @@
 void testingCode(){
   setupAll();
   Serial.println("Testing starting.");
-  delay(1000);
+  //delay(1000);
   //turnToWeightAtRight();
   while(true){
     updateAll();
-<<<<<<< HEAD
-    Serial.print(getUsHigh());
-    Serial.print("\t");
-    Serial.println(getUsLow());
-=======
+    Serial.println(getUsHigh());
     //Serial.println(getAngle());
->>>>>>> 4ef83e7d42b568ec9df4e94a7c1c1c1aaf08af0a
     //randomMovement();
   }
 }
 
 void randomMovement(){
-  //Serial.println(movingState);
+  Serial.println(movingState);
   if (position == CORNER){
     moveBackShort();
   }
