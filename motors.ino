@@ -127,7 +127,7 @@ void turnToWeightAtLeft(void){
   int duration = 100;
   leftMotor(-30, duration);
   rightMotor(50, duration);
-  turningToWeightAtRightStopTime = millis() + duration;
+  turningToWeightAtLeftStopTime = millis() + duration;
 }
 
 void turnToWeightAtRight(void){
@@ -137,12 +137,40 @@ void turnToWeightAtRight(void){
   int duration = 100;
   leftMotor(50, duration);
   rightMotor(-30, duration);
+  turningToWeightAtRightStopTime = millis() + duration;
+}
+
+void turnToWeightAtRightTouch(void){
+  if (serial) Serial.println("Turning to weight at right touch");
+  movingP = 2;
+  updateMovingState((int) TURN_TO_WEIGHT_AT_RIGHT);
+  int duration = 300;
+  leftMotor(50, duration);
+  rightMotor(-30, duration);
+  turningToWeightAtRightStopTime = millis() + duration;
+}
+
+
+void turnToWeightAtLeftTouch(void){
+  if (serial) Serial.println("Turning to weight at left touch");
+  movingP = 2;
+  updateMovingState((int) TURN_TO_WEIGHT_AT_LEFT);
+  int duration = 300;
+  leftMotor(-30, duration);
+  rightMotor(50, duration);
   turningToWeightAtLeftStopTime = millis() + duration;
 }
 
+
+
+
+
+
+
+
 void moveToWeightInFront(void){
   if (serial) Serial.println("Move to weight in front");
-  movingP = 3;
+  movingP = 9;
   updateMovingState((int) MOVING_TO_WEIGHT_IN_FRONT);
   leftMotor(40, -1);
   rightMotor(40, -1);
@@ -165,6 +193,8 @@ void moveToWeightAtRightEdge(void){
   leftMotor(50, duration);
   rightMotor(-30, duration);  
 }
+
+
 
 void stopMoving(void){
   if (serial) Serial.println("stop moving");
@@ -221,7 +251,7 @@ void moveBackShort(void){
 }
 
 void moveBackLong(void){
-  if (serial) Serial.println("moving back long");
+  if (serial) {Serial.println("moving back long"); }
   movingP = 4;
   updateMovingState((int) MOVE_BACK_LONG);
   int duration = 1200;
@@ -326,8 +356,8 @@ boolean isRightMotorMovingFixTime(void){
 // If value outside this range given, then it will default to nearest limit.
 int setLeftMotor(int value) {
   if (serial) {
-    Serial.print("Setting L motor to value of: ");
-    Serial.println(value);
+    //Serial.print("Setting L motor to value of: ");
+    //Serial.println(value);
   }
   if (value > 50) {
     value = 50;
@@ -343,8 +373,8 @@ int setLeftMotor(int value) {
 // If value outside this range given, then it will default to nearest limit.
 int setRightMotor(int value) {
   if (serial) {
-    Serial.print("Setting R motor to value of: ");
-    Serial.println(value);
+    //Serial.print("Setting R motor to value of: ");
+    //Serial.println(value);
   }
   if (value > 50) {
     value = 50;

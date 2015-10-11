@@ -74,9 +74,13 @@ void setupServo(void) {
   Herkulex.reboot(tray);
   Herkulex.reboot(box);
   //Herkulex.reboot(allServos);
-  delay(500);
+  delay(200);
   Herkulex.initialize();
   delay(200);
+
+  lowerTray();
+  raiseLiftServo(1000);
+  delay(1000);
 
 }
 // =====================================================================
@@ -257,6 +261,7 @@ boolean weightReadyToPick(void) {
 
 
 void updatePickUp(void) {
+  Serial.println("update pick");
   long time = millis();
   
   if (weightReadyToPick() && !(pickingState == WAITING)) { waitingToPick = true; }
@@ -279,7 +284,7 @@ void updatePickUp(void) {
         timeDone = time + lowerLiftServoTime;
       }
     }
-    if (serial) Serial.println("No food ready to pick");
+    //if (serial) Serial.println("No food ready to pick");
     break;
     
     case DROPPING_FRONT:

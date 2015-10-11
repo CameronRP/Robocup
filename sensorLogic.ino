@@ -21,10 +21,12 @@
 //=================VARIABLES=========================
 
 
-enum Position {CORNER, WALL_LEFT_SIDE, WALL_RIGHT_SIDE, WALL_IN_FRONT, WALL_AT_LEFT, WALL_AT_RIGHT, NO_WALL};
+enum Position {CORNER, WALL_LEFT_SIDE, WALL_RIGHT_SIDE, WALL_IN_FRONT, WALL_AT_LEFT, WALL_AT_RIGHT, NO_WALL, TOO_LONG_AT_WALL};
 Position position = NO_WALL;
+long lastNoWallTime = 0;
 
 void updatePositionState(){
+  
   if (isWallCloseLeftAngle() && isWallCloseRightAngle()) {
     position = CORNER;  
   } else if (isWallCloseLeft() && isWallCloseRight() || isWallCloseMid()){
@@ -40,7 +42,13 @@ void updatePositionState(){
   } 
   else {
     position = NO_WALL;
+    //if (serial) Serial.println("No Wall");
+    lastNoWallTime = millis();
   };
+  if (lastNoWallTime + 5000 < millis()){
+    //if (serial) Serial.println("Too long at wall.");
+    position = TOO_LONG_AT_WALL;
+  }
 }
 
 
@@ -56,7 +64,14 @@ boolean onGreen(void) { return (onGreenRA->getAverage() == COLOUR_BUFFER_SIZE); 
 boolean onBlue(void) { return (onBlueRA->getAverage() == COLOUR_BUFFER_SIZE); }
 boolean onBlack(void) { return (onBlackRA->getAverage() == COLOUR_BUFFER_SIZE); }
 
-
+boolean leftTouchWeight = false;
+boolean rightTouchWeight = false;
+boolean isLeftTouchWeight(){
+  return leftTouchWeight;
+}
+boolean isRightTouchWeight(){
+  return rightTouchWeight;  
+}
 
 
 //=============FACEING A WALL========================
@@ -129,8 +144,13 @@ void updateSensorLogic(){
 
   //======================LEFT SIDE WEIGHT DETECT====================
   boolean lweight = false;
-  
-  if (getIR2() > 250){
+
+  leftTouchWeight = false;
+  if (isLeftFront() && !isWallAtLeft()){
+    lweight = true;
+    leftTouchWeight = true;
+  }
+  else if (getIR2() > 250){
     digitalWrite(29, LOW);
     int percentDiff = (getIR2()-getIR1())*100/getIR2();
     //Serial.println(percentDiff);
@@ -166,7 +186,12 @@ void updateSensorLogic(){
   
   //=========RIGHT SIDE WEIGHT DETECT=================================
   boolean rweight = false;
-  if (getIR4() > 100){
+  rightTouchWeight = false;
+  if (isRightFront() && !isWallAtRight()){
+    rweight = true;
+    rightTouchWeight = true;
+  }
+  else if (getIR4() > 100){
     int percentDiff = (getIR4()-getIR5())*100/getIR4();
     if (percentDiff > 20) {
       rweight = true;
@@ -180,11 +205,16 @@ void updateSensorLogic(){
   //================END RIGHT SIDE WEIGHT DETECT=========
 
   //=============MID WEIGHT DETECT========================================
+  
   boolean mweight = false;
-  if (getUsLow() == -1 && getUsHigh() > 100){
-    mweight = true;
+  
+  if (getUsLow() == -1 && getUsHigh() > 200){
+    mweight = true;  
   }
-  else if (getUsLow() < getUsHigh()){
+  
+  
+  
+  if (getUsLow() < getUsHigh()){
     mweight = true;
   }
   if (mweight){
