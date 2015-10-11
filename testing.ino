@@ -10,12 +10,15 @@ void testingCode(){
   //turnToWeightAtRight();
   while(true){
     updateAll();
-    randomMovement();
+    Serial.print(getUsHigh());
+    Serial.print("\t");
+    Serial.println(getUsLow());
+    //randomMovement();
   }
 }
 
 void randomMovement(){
-  Serial.println(movingState);
+  //Serial.println(movingState);
   if (position == CORNER){
     moveBackShort();
   }
