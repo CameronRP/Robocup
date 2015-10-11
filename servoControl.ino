@@ -32,7 +32,7 @@ const int raisedAngleLift = 30;
 const int slidingAngleLift = -50;
 const int loweredAngleLift = -140;
 
-const int raisedAngleTray = 40; // safe below the plug of the R long range IR is about 65
+const int raisedAngleTray = 20; // safe below the plug of the R long range IR is about 65
 const int loweredAngleTray = 140;
 //===========================
 
@@ -40,12 +40,13 @@ const int loweredAngleTray = 140;
 //========================= Declarations for Pickup =======================
 
 enum PickingState {WAITING, DROPPING_FRONT, SWEEPING, RAISING_FRONT, WINDING_IN, RESETTING};
-PickingState pickingState = RESETTING;
+PickingState pickingState = WAITING;
 const int lowerLiftServoTime = 500;
-const int sweepTime = 500;
-const int raiseLiftServoTime = 1000;
-const int watchDogUpTime = 3000;
-const int windOutTime = 2500;
+const int raiseLiftServoTime = 2854;
+const int watchDogUpTime = 10000;
+const int windOutTime = 4500; //5000 was a little bit too far
+const int sweepTime = 100;
+const int windInRailSpeed = 400;
 
 
 long timeDone = 0;
@@ -111,13 +112,12 @@ void sweepRailServo() {
   if (serial) {
     Serial.print("Sweeping rail servo");
   }
-  Herkulex.moveSpeedOne(rail, 400, sweepTime, LED_GREEN);
+  Herkulex.moveSpeedOne(rail, -400, sweepTime, LED_GREEN);
 }
-
 
 void windRailOut(void) {
   
-  Herkulex.moveSpeedOne(rail, 1000, windOutTime, LED_GREEN);
+  Herkulex.moveSpeedOne(rail, 500, 0, LED_GREEN);
 }
 
 // ========================= END RAIL ==========================
@@ -175,21 +175,21 @@ int checkFrontServoPos(void) {
 // Regardless of above will command servo to go to raised position over a time of 2.5s.
 //
 // NOTE: DELAY FOR SERVO TO MOVE NOT BUILT INTO THIS FUNCTION 
-void raiseLiftServo(int raiseLiftServoTime) {
-  Herkulex.moveOneAngle(lift, raisedAngleLift, raiseLiftServoTime, LED_GREEN);
+void raiseLiftServo(int thisOne) {
+  Herkulex.moveOneAngle(lift, raisedAngleLift, thisOne, LED_GREEN);
 }
 
-void slidingLiftServo(int raiseLiftServoTime) {
-  Herkulex.moveOneAngle(lift, slidingAngleLift, raiseLiftServoTime, LED_GREEN);
+void slidingLiftServo(int thisOne) {
+  Herkulex.moveOneAngle(lift, slidingAngleLift, thisOne, LED_GREEN);
 }
 
 // Lowers the lift servo. Returns 0 if already at lowered position, and 1 if it was not.
 // Regardless of above will command servo to go to lowered position over a time of 0.5s
 //
 // NOTE: DELAY FOR SERVO TO MOVE NOT BUILT INTO THIS FUNCTION 
-void lowerLiftServo(int lowerLiftServoTime) {
+void lowerLiftServo(int lowerTime) {
   if (serial) Serial.println("Lowering lift servo");
-  Herkulex.moveOneAngle(lift, loweredAngleLift, lowerLiftServoTime, LED_GREEN);
+  Herkulex.moveOneAngle(lift, loweredAngleLift, lowerTime, LED_GREEN);
 }
 
 // ============================ END LIFT SERVO ==========================
@@ -216,7 +216,7 @@ int checkTrayPos(void) {
 
 void raiseTray(void) {
   int pos = Herkulex.getAngle(tray);
-  Herkulex.moveOneAngle(tray, raisedAngleTray, 1500, LED_GREEN);
+  Herkulex.moveOneAngle(tray, raisedAngleTray, 2600, LED_GREEN);
 }
 
 void lowerTray(void) {
@@ -263,7 +263,7 @@ void updatePickUp(void) {
   
   switch (pickingState) {
     case WAITING:
-    stopLiftServo();
+    //stopLiftServo();
     stopRailServo();
     
     if (weightReadyToPick()) {
@@ -293,6 +293,7 @@ void updatePickUp(void) {
     
     case SWEEPING:
       if (time > timeDone) {
+        stopRailServo();
         pickingState = RAISING_FRONT;
         raiseLiftServo(raiseLiftServoTime);
         timeDone = time + raiseLiftServoTime;
@@ -304,12 +305,13 @@ void updatePickUp(void) {
       if (time > timeDone) {
         pickingState = WINDING_IN;
         timeDone = time + watchDogUpTime;
+        if (serial) Serial.println("Setting timeout to: " + String(timeDone));
       }
       break;
     
     case WINDING_IN:  
-      moveRailServo(800);
-      
+      moveRailServo(windInRailSpeed);
+      if (serial) Serial.println("Winding in, time is " + String(time));
       if (isDigIR()) { seenWeight = true; }
       
       
@@ -319,8 +321,9 @@ void updatePickUp(void) {
         railGoingDown = true;
         delay(5);
         pickingState = RESETTING;
+        lowerLiftServo(500);
         windRailOut();
-        timeDone = millis() + windOutTime;
+        timeDone = time + windOutTime;
       }
       else if (time > timeDone) {
         stopRailServo();
@@ -338,7 +341,8 @@ void updatePickUp(void) {
         
         if (time > timeDone) {
           stopRailServo();
-          //shake(50);
+          shake(200);
+          raiseLiftServo(200);
           railGoingDown = false;
           pickingState = WAITING;
         }
@@ -356,8 +360,8 @@ void updatePickUp(void) {
 
 void dumpWeights(void) {
   raiseTray();
-  shake(2000);
+  shake(3000);
   lowerTray();
-  shake(1000);
+  shake(1500);
   resetWeightCount();
 }

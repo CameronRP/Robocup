@@ -12,27 +12,29 @@ void testServo(void) {
   if (serial) Serial.println("Testing Servos!");
   
   
-  Herkulex.torqueOFF(rail);
+  //Herkulex.torqueOFF(rail);
   
   Herkulex.setLed(rail, LED_GREEN);
   Herkulex.setLed(tray, LED_PINK);
   Herkulex.setLed(box, LED_BLUE);
   Herkulex.setLed(lift, LED_WHITE);
-  Herkulex.moveOneAngle(lift, slidingAngleLift, 2000, LED_GREEN);
+  Herkulex.moveOneAngle(tray, goal, 2000, LED_GREEN);
   //Herkulex.moveOneAngle(tray, goal, 2000, LED_GREEN);
   delay(2100);
   while (true) {
-    //Serial.println("here");
+    
     updateAll();
-    //Serial.println("there");
     //updatePickUp();
-    moveServoOnTouch();
-    //delayedPrinting();
-    //iterateAngleOnTouch();
+
+    //moveServoOnTouch();
+    delayedPrinting();
+    iterateAngleOnTouch();
+    
     //if (isConduction()) { shake(400); }
-    digitalWrite(led1, isConduction());
+    //digitalWrite(led1, isConduction());
     digitalWrite(led2, isLimit());
-    digitalWrite(led3, isLeftFront() || isRightFront());
+    //digitalWrite(led3, isLeftFront() || isRightFront());
+    
   }
 }
 
@@ -41,18 +43,33 @@ void testServo(void) {
 //moveTrayServo
 //move
 void moveServoOnTouch(void) {
+  
+  if (isLimit()) {
+      stopRailServo();
+      digitalWrite(led1, HIGH);
+      railGoingUp = false;
+      railGoingDown = true;
+      delay(50);
+  }
+  
+  digitalWrite(led1, LOW);
   if (isLeftFront()) { 
     raiseLiftServo(2854);
   } else
   if (isRightFront()) {
     Herkulex.moveOneAngle(lift, loweredAngleLift, 1500, LED_GREEN);
-} else
-  { stopRailServo(); }
+  } else if (isConduction()) {
+    moveRailServo(200);
+        
+    //if (isDigIR()) { seenWeight = true; }
+    
+  }
 
 }
 
 void delayedPrinting(void) {
   Serial.print("\nTray is at: ");
+  Serial.println(goal);
   Serial.println(getUsHigh());
   Serial.println(getUsLow());
   //Serial.print("Lift is at: ");

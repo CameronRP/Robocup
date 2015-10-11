@@ -181,10 +181,11 @@ void updateSensorLogic(){
 
   //=============MID WEIGHT DETECT========================================
   boolean mweight = false;
-  if (getUsLow() < getUsHigh()){
+  if (getUsLow() == -1 && getUsHigh() > 100){
     mweight = true;
-  } else if (getUsHigh() == -1 && getUsLow() < 600){
-    mweight = true;  
+  }
+  else if (getUsLow() < getUsHigh()){
+    mweight = true;
   }
   if (mweight){
     midWeight->addValue(WEIGHT_BUFFER_SIZE);

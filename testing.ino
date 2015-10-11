@@ -10,7 +10,7 @@ void testingCode(){
   //turnToWeightAtRight();
   while(true){
     updateAll();
-    Serial.println(getUsHigh());
+    Serial.println(getIR6());
     //Serial.println(getAngle());
     //randomMovement();
   }
