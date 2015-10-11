@@ -10,7 +10,8 @@ void testingCode(){
   //turnToWeightAtRight();
   while(true){
     updateAll();
-    randomMovement();
+    //Serial.println(getAngle());
+    //randomMovement();
   }
 }
 
